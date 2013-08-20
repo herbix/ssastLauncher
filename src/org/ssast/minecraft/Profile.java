@@ -79,6 +79,8 @@ public class Profile {
 		if(version == null)
 			version = "";
 		runPath = frame.runPath.getText();
+		if(runPath.equals(""))
+			runPath = Config.gamePath;
 	}
 	
 	@Override
