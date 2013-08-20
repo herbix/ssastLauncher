@@ -85,7 +85,7 @@ ui.table.type=Type
 ui.jrepath.label=JRE path:
 ui.jrepath.filechooser.title=Choose JRE Path
 
-ui.profile.label=\u767b\u5f55\u914d\u7f6e\uff1a
+ui.profile.label=Profiles:
 ui.profile.add=Add
 ui.profile.remove=Remove
 
