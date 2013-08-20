@@ -49,6 +49,9 @@ msg.version.downloading=Updating version info...
 msg.version.failed=Unable to update version info.
 msg.version.succeeded=Version info has been updated.
 
+msg.profile.cannotremovedefault=Cannot remove default profile.
+msg.profile.removeconfirm=Are you sure you want to remove this profile?
+
 msg.gamepath.error=Unable to use '.minecraft' directory.
 msg.help=\u0020- Compatible with new version minecraft.\n - Easy to inject mods.\n - Manage more than one version of minecraft.\n - Compatible with json type versions.\nBug reporting: fakechaos@sina.com.
 msg.jrepath.error=Unable to run java from specified jre path.
@@ -79,9 +82,17 @@ ui.table.name=Name
 ui.table.state=State
 ui.table.type=Type
 
-ui.filechooser.title=Choose JRE Path
-ui.update.title=Updating...
 ui.jrepath.label=JRE path:
+ui.jrepath.filechooser.title=Choose JRE Path
+
+ui.profile.label=\u767b\u5f55\u914d\u7f6e\uff1a
+ui.profile.add=Add
+ui.profile.remove=Remove
+
+ui.runpath.label=Work Directory
+ui.runpath.filechooser.title=Choose Work Directory
+
+ui.update.title=Updating...
 ui.launch=Launch
 ui.memory.label=Memory Size(MB):
 ui.offline=Offline

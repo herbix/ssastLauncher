@@ -74,15 +74,11 @@ public class LauncherFrame extends JFrame {
 	JComboBox authType = new JComboBox();
 	JLabel gameVersionLabel = new JLabel(Lang.getString("ui.version.label"));
 	JComboBox gameVersion = new JComboBox();
-	//TODO: Localization
-	JLabel profilesLabel = new JLabel("登录配置：");
+	JLabel profilesLabel = new JLabel(Lang.getString("ui.profile.label"));
 	JComboBox profiles = new JComboBox();
-	//TODO: Localization
-	JButton addProfile = new JButton("增加配置");
-	//TODO: Localization
-	JButton removeProfile = new JButton("删除配置");
-	//TODO: Localization
-	JLabel runPathLabel = new JLabel("工作路径（储存存档，设置等）");
+	JButton addProfile = new JButton(Lang.getString("ui.profile.add"));
+	JButton removeProfile = new JButton(Lang.getString("ui.profile.remove"));
+	JLabel runPathLabel = new JLabel(Lang.getString("ui.runpath.label"));
 	JTextField runPath = new JTextField();
 	JButton runPathSearch = new JButton("...");
 	ButtonGroup runningMode = new ButtonGroup();
@@ -262,7 +258,7 @@ public class LauncherFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				fc.setCurrentDirectory(new File(jrePath.getText()));
 				fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				fc.showDialog(LauncherFrame.this, Lang.getString("ui.filechooser.title"));
+				fc.showDialog(LauncherFrame.this, Lang.getString("ui.jrepath.filechooser.title"));
 				if(fc.getSelectedFile() != null)
 					jrePath.setText(fc.getSelectedFile().getPath());
 			}
@@ -319,8 +315,7 @@ public class LauncherFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				fc.setCurrentDirectory(new File(runPath.getText()));
 				fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				//TODO: Localization
-				fc.showDialog(LauncherFrame.this, "选择工作路径");
+				fc.showDialog(LauncherFrame.this, Lang.getString("ui.runpath.filechooser.title"));
 				if(fc.getSelectedFile() != null)
 					runPath.setText(fc.getSelectedFile().getPath());
 			}
@@ -387,11 +382,16 @@ public class LauncherFrame extends JFrame {
 		public List<Component> componentList = new ArrayList<Component>();
 		
 		public LauncherFrameFocusTraversalPolicy() {
+			componentList.add(profiles);
+			componentList.add(addProfile);
+			componentList.add(removeProfile);
 			componentList.add(user);
 			componentList.add(pass);
 			componentList.add(savePass);
 			componentList.add(authType);
 			componentList.add(gameVersion);
+			componentList.add(runPath);
+			componentList.add(runPathSearch);
 			componentList.add(launch);
 			componentList.add(jrePath);
 			componentList.add(jrePathSearch);

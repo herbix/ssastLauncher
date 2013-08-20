@@ -143,13 +143,13 @@ public class Launcher {
 		
 		frame.addProfile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String name = JOptionPane.showInputDialog(frame, "输入新配置的名称：", 
+				String name = JOptionPane.showInputDialog(frame, Lang.getString("msg.profile.inputname"), 
 					"SSAST Launcher", JOptionPane.QUESTION_MESSAGE);
 				if(name == null) {
 					return;
 				}
 				if(Config.profiles.containsKey(name)) {
-					System.out.println("此配置已存在");
+					System.out.println(Lang.getString("msg.profile.exists"));
 					return;
 				}
 				Profile profile = new Profile(name, null);
@@ -163,13 +163,11 @@ public class Launcher {
 		frame.removeProfile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(Config.currentProfile.profileName.equals("(Default)")) {
-					//TODO: Localization
-					System.out.println("不能删除默认配置");
+					System.out.println(Lang.getString("msg.profile.cannotremovedefault"));
 					return;
 				}
-				//TODO: Localization
-				int r = JOptionPane.showConfirmDialog(frame, "是否要删除当前配置？", "SSAST Launcher", 
-					JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+				int r = JOptionPane.showConfirmDialog(frame, Lang.getString("msg.profile.removeconfirm"),
+					"SSAST Launcher", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 				if(r != JOptionPane.YES_OPTION) {
 					return;
 				}
