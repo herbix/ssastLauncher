@@ -7,6 +7,7 @@ import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.Map;
 
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
@@ -16,8 +17,6 @@ import org.ssast.minecraft.auth.ServerAuth;
 import org.ssast.minecraft.download.DownloadCallbackAdapter;
 import org.ssast.minecraft.download.Downloadable;
 import org.ssast.minecraft.download.Downloader;
-import org.ssast.minecraft.mod.Mod;
-import org.ssast.minecraft.mod.ModManager;
 import org.ssast.minecraft.process.Runner;
 import org.ssast.minecraft.util.EasyFileAccess;
 import org.ssast.minecraft.util.Lang;
@@ -101,13 +100,9 @@ public class Launcher {
 				
 				Object s = frame.gameVersion.getSelectedItem();
 				if(s == null)
-					s = Config.version;
+					s = Config.currentProfile.version;
 				ModuleManager.showModules(frame.gameVersion);
 				frame.gameVersion.setSelectedItem(s);
-
-				Module module = ModuleManager.getSelectedModule(frame.gameVersion);
-				String version = module == null ? "" : module.getName();
-				ModManager.showMods(frame.mods, version);
 			}
 		});
 	}
@@ -135,54 +130,64 @@ public class Launcher {
 					ModuleManager.getAssetsModule().install();
 				}
 				refreshComponentsList();
-				ModManager.showMods(frame.mods, "");
 			} else {
 				System.out.println(Lang.getString("msg.version.failed"));
 			}
 		}
 	}
 
-	private void initModList() {
-		Module module = ModuleManager.getSelectedModule(frame.gameVersion);
-		String version = module == null ? "" : module.getName();
-		ModManager.initModInfo(Config.MOD_DIR, Config.loadedMod, version);
-		ModManager.showMods(frame.mods, version);
-	}
-
 	private void initListeners() {
-		frame.loadMod.addActionListener(new ModActionListener());
-		frame.unloadMod.addActionListener(new ModActionListener());
 		frame.installModules.addActionListener(new ModuleActionListener());
 		frame.uninstallModules.addActionListener(new ModuleActionListener());
 		frame.launch.addActionListener(new LaunchActionListener());
 		
-		frame.gameVersion.addItemListener(new ItemListener(){
-			public void itemStateChanged(ItemEvent e) {
-				Module module = ModuleManager.getSelectedModule(frame.gameVersion);
-				String version = module == null ? "" : module.getName();
-				ModManager.showMods(frame.mods, version);
+		frame.addProfile.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String name = JOptionPane.showInputDialog(frame, "输入新配置的名称：", 
+					"SSAST Launcher", JOptionPane.QUESTION_MESSAGE);
+				if(name == null) {
+					return;
+				}
+				if(Config.profiles.containsKey(name)) {
+					System.out.println("此配置已存在");
+					return;
+				}
+				Profile profile = new Profile(name, null);
+
+				Config.profiles.put(name, profile);
+				frame.profiles.addItem(profile);
+				frame.profiles.setSelectedItem(profile);
 			}
 		});
-	}
 
-	class ModActionListener implements ActionListener {
-		public void actionPerformed(ActionEvent e) {
-			Mod m = ModManager.getSelectedMod(frame.mods);
-			if(m == null) {
-				System.out.println(Lang.getString("msg.mod.noselection"));
-				return;
+		frame.removeProfile.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(Config.currentProfile.profileName.equals("(Default)")) {
+					//TODO: Localization
+					System.out.println("不能删除默认配置");
+					return;
+				}
+				//TODO: Localization
+				int r = JOptionPane.showConfirmDialog(frame, "是否要删除当前配置？", "SSAST Launcher", 
+					JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+				if(r != JOptionPane.YES_OPTION) {
+					return;
+				}
+				Config.profiles.remove(Config.currentProfile.profileName);
+				frame.profiles.removeItem(Config.currentProfile);
 			}
-			if(e.getSource() == frame.loadMod) {
-				if(m.isLoaded())
-					System.out.println(Lang.getString("msg.mod.alreadyloaded"));
-				else
-					if(!m.setLoaded(true))
-						System.out.println(Lang.getString("msg.mod.conflict"));
-			} else {
-				m.setLoaded(false);
+		});
+		
+		frame.profiles.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				Config.currentProfile.updateFromFrame(frame);
+				Config.currentProfile = (Profile)frame.profiles.getSelectedItem();
+				if(Config.currentProfile == null) {
+					Config.currentProfile = Config.profiles.get("(Default)");
+				}
+				Config.currentProfile.updateToFrame(frame);
 			}
-			ModManager.showMods(frame.mods, ModuleManager.getSelectedModule(frame.gameVersion).getName());
-		}
+		});
 	}
 
 	class ModuleActionListener implements ActionListener {
@@ -247,14 +252,12 @@ public class Launcher {
 								Runner runner = new Runner(ModuleManager.getSelectedModule(frame.gameVersion), auth);
 								if(!runner.prepare()) {
 									isLoggingIn = false;
-									//auth.logout();
 									return;
 								}
 								frame.setVisible(false);
 								Config.saveConfig();
 								Downloader.stopAll();
 								runner.start();
-								//auth.logout();
 								frame.dispose();
 							} else {
 								System.out.println(Lang.getString("msg.auth.failed"));
@@ -277,9 +280,7 @@ public class Launcher {
 		initGameDirs();
 		
 		initGameComponentsList();
-		
-		initModList();
-		
+
 		initListeners();
 	}
 

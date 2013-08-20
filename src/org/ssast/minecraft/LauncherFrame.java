@@ -59,16 +59,11 @@ public class LauncherFrame extends JFrame {
 	DefaultTableModel modulesModel = new UneditableTableModel();
 	JTable modules = new JTable(modulesModel);
 	JScrollPane modulesOuter = new JScrollPane(modules);
-	JLabel modsLabel = new JLabel(Lang.getString("ui.mod.label"));
-	DefaultTableModel modsModel = new UneditableTableModel();
-	JTable mods = new JTable(modsModel);
-	JScrollPane modsOuter = new JScrollPane(mods);
 	JSeparator hseparator = new JSeparator();
+	JSeparator hseparator2 = new JSeparator();
 	JSeparator vseparator = new JSeparator();
 	JButton installModules = new JButton(Lang.getString("ui.module.install"));
 	JButton uninstallModules = new JButton(Lang.getString("ui.module.uninstall"));
-	JButton loadMod = new JButton(Lang.getString("ui.mod.load"));
-	JButton unloadMod = new JButton(Lang.getString("ui.mod.unload"));
 	JLabel userLabel = new JLabel(Lang.getString("ui.username.label"));
 	JTextField user = new JTextField();
 	JLabel passLabel = new JLabel(Lang.getString("ui.password.label"));
@@ -79,6 +74,17 @@ public class LauncherFrame extends JFrame {
 	JComboBox authType = new JComboBox();
 	JLabel gameVersionLabel = new JLabel(Lang.getString("ui.version.label"));
 	JComboBox gameVersion = new JComboBox();
+	//TODO: Localization
+	JLabel profilesLabel = new JLabel("µ«¬º≈‰÷√£∫");
+	JComboBox profiles = new JComboBox();
+	//TODO: Localization
+	JButton addProfile = new JButton("‘ˆº”≈‰÷√");
+	//TODO: Localization
+	JButton removeProfile = new JButton("…æ≥˝≈‰÷√");
+	//TODO: Localization
+	JLabel runPathLabel = new JLabel("π§◊˜¬∑æ∂£®¥¢¥Ê¥Êµµ£¨…Ë÷√µ»£©");
+	JTextField runPath = new JTextField();
+	JButton runPathSearch = new JButton("...");
 	ButtonGroup runningMode = new ButtonGroup();
 	JRadioButton runningMode32 = new JRadioButton(Lang.getString("ui.mode.d32"), false);
 	JRadioButton runningMode64 = new JRadioButton(Lang.getString("ui.mode.d64"), false);
@@ -144,7 +150,7 @@ public class LauncherFrame extends JFrame {
 		
 		base.add(modulesOuter);
 		modulesOuter.setLocation(0, 20);
-		modulesOuter.setSize(300, 150);
+		modulesOuter.setSize(395, 200);
 		modulesModel.addColumn(Lang.getString("ui.table.name"));
 		modulesModel.addColumn(Lang.getString("ui.table.type"));
 		modulesModel.addColumn(Lang.getString("ui.table.state"));
@@ -153,22 +159,13 @@ public class LauncherFrame extends JFrame {
 		modules.getTableHeader().getColumnModel().getColumn(2).setPreferredWidth(75);
 		modules.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
-		base.add(modsLabel);
-		modsLabel.setLocation(0, 173);
-		modsLabel.setSize(300, 16);
-		
-		base.add(modsOuter);
-		modsOuter.setLocation(0, 190);
-		modsOuter.setSize(300, 150);
-		modsModel.addColumn(Lang.getString("ui.table.name"));
-		modsModel.addColumn(Lang.getString("ui.table.state"));
-		mods.getTableHeader().getColumnModel().getColumn(0).setPreferredWidth(225);
-		mods.getTableHeader().getColumnModel().getColumn(1).setPreferredWidth(75);
-		mods.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		
 		base.add(hseparator);
 		hseparator.setLocation(1, 344);
 		hseparator.setSize(598, 2);
+
+		base.add(hseparator2);
+		hseparator2.setLocation(1, 260);
+		hseparator2.setSize(398, 2);
 		
 		base.add(vseparator);
 		vseparator.setOrientation(SwingConstants.VERTICAL);
@@ -176,35 +173,27 @@ public class LauncherFrame extends JFrame {
 		vseparator.setSize(2, 342);
 		
 		base.add(installModules);
-		installModules.setLocation(305, 20);
+		installModules.setLocation(5, 225);
 		installModules.setSize(90, 30);
 		
 		base.add(uninstallModules);
-		uninstallModules.setLocation(305, 55);
+		uninstallModules.setLocation(100, 225);
 		uninstallModules.setSize(90, 30);
 		
-		base.add(loadMod);
-		loadMod.setLocation(305, 190);
-		loadMod.setSize(90, 30);
-		
-		base.add(unloadMod);
-		unloadMod.setLocation(305, 225);
-		unloadMod.setSize(90, 30);
-		
 		base.add(userLabel);
-		userLabel.setLocation(405, 5);
+		userLabel.setLocation(405, 68);
 		userLabel.setSize(200, 20);
 		
 		base.add(user);
-		user.setLocation(405, 25);
+		user.setLocation(405, 88);
 		user.setSize(190, 25);
 		
 		base.add(passLabel);
-		passLabel.setLocation(405, 47);
+		passLabel.setLocation(405, 115);
 		passLabel.setSize(200, 20);
 		
 		base.add(pass);
-		pass.setLocation(405, 67);
+		pass.setLocation(405, 135);
 		pass.setSize(190, 25);
 		pass.addFocusListener(new FocusAdapter(){
 			@Override
@@ -214,59 +203,59 @@ public class LauncherFrame extends JFrame {
 			}
 		});
 		
-		base.add(launch);
-		launch.setLocation(405, 162);
-		launch.setSize(190, 38);
-		
 		base.add(savePass);
-		savePass.setLocation(405, 93);
+		savePass.setLocation(405, 163);
 		savePass.setSize(190, 20);
 
-		base.add(gameVersion);
-		gameVersion.setLocation(485, 138);
-		gameVersion.setSize(110, 20);
-		
-		base.add(gameVersionLabel);
-		gameVersionLabel.setLocation(405, 139);
-		gameVersionLabel.setSize(80, 20);
-		
 		base.add(authType);
-		authType.setLocation(485, 115);
-		authType.setSize(110, 20);
+		authType.setLocation(485, 188);
+		authType.setSize(110, 23);
 		for(AuthType at : AuthType.values()) {
 			authType.addItem(at);
 		}
 		
 		base.add(authTypeLabel);
-		authTypeLabel.setLocation(405, 116);
+		authTypeLabel.setLocation(405, 188);
 		authTypeLabel.setSize(80, 20);
+
+		base.add(gameVersion);
+		gameVersion.setLocation(485, 216);
+		gameVersion.setSize(110, 23);
+		
+		base.add(gameVersionLabel);
+		gameVersionLabel.setLocation(405, 216);
+		gameVersionLabel.setSize(80, 20);
+		
+		base.add(launch);
+		launch.setLocation(405, 302);
+		launch.setSize(190, 38);
 
 		runningMode.add(runningMode32);
 		runningMode.add(runningMode64);
 		runningMode.add(runningModeDefault);
 		
 		base.add(runningMode32);
-		runningMode32.setLocation(405, 250);
+		runningMode32.setLocation(5, 320);
 		runningMode32.setSize(62, 20);
 		
 		base.add(runningMode64);
-		runningMode64.setLocation(467, 250);
+		runningMode64.setLocation(67, 320);
 		runningMode64.setSize(63, 20);
 		
 		base.add(runningModeDefault);
-		runningModeDefault.setLocation(530, 250);
+		runningModeDefault.setLocation(130, 320);
 		runningModeDefault.setSize(70, 20);
 		
 		base.add(jrePathLabel);
-		jrePathLabel.setLocation(405, 200);
+		jrePathLabel.setLocation(5, 265);
 		jrePathLabel.setSize(200, 20);
 		
 		base.add(jrePath);
-		jrePath.setLocation(405, 220);
+		jrePath.setLocation(5, 290);
 		jrePath.setSize(160, 25);
 		
 		base.add(jrePathSearch);
-		jrePathSearch.setLocation(570, 220);
+		jrePathSearch.setLocation(170, 290);
 		jrePathSearch.setSize(25, 25);
 		jrePathSearch.addActionListener(new ActionListener() {
 			private JFileChooser fc = new JFileChooser();
@@ -280,21 +269,60 @@ public class LauncherFrame extends JFrame {
 		});
 		
 		base.add(memorySizeLabel);
-		memorySizeLabel.setLocation(405, 280);
+		memorySizeLabel.setLocation(205, 270);
 		memorySizeLabel.setSize(110, 20);
 		
 		base.add(memorySize);
-		memorySize.setLocation(515, 280);
+		memorySize.setLocation(315, 270);
 		memorySize.setSize(80, 25);
 		
 		base.add(memorySizeSlider);
-		memorySizeSlider.setLocation(405, 305);
+		memorySizeSlider.setLocation(205, 295);
 		memorySizeSlider.setSize(190, 38);
 		memorySizeSlider.setMinimum(0);
 		memorySizeSlider.setMaximum(8192);
 		memorySizeSlider.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent e) {
 				memorySize.setText(String.valueOf(memorySizeSlider.getValue()));
+			}
+		});
+		
+		base.add(profilesLabel);
+		profilesLabel.setLocation(405, 5);
+		profilesLabel.setSize(65, 20);
+		
+		base.add(profiles);
+		profiles.setLocation(470, 5);
+		profiles.setSize(125, 23);
+		
+		base.add(addProfile);
+		addProfile.setLocation(405, 35);
+		addProfile.setSize(92, 30);
+
+		base.add(removeProfile);
+		removeProfile.setLocation(503, 35);
+		removeProfile.setSize(92, 30);
+
+		base.add(runPathLabel);
+		runPathLabel.setLocation(405, 245);
+		runPathLabel.setSize(200, 20);
+		
+		base.add(runPath);
+		runPath.setLocation(405, 270);
+		runPath.setSize(160, 25);
+		
+		base.add(runPathSearch);
+		runPathSearch.setLocation(570, 270);
+		runPathSearch.setSize(25, 25);
+		runPathSearch.addActionListener(new ActionListener() {
+			private JFileChooser fc = new JFileChooser();
+			public void actionPerformed(ActionEvent e) {
+				fc.setCurrentDirectory(new File(runPath.getText()));
+				fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				//TODO: Localization
+				fc.showDialog(LauncherFrame.this, "—°‘Òπ§◊˜¬∑æ∂");
+				if(fc.getSelectedFile() != null)
+					runPath.setText(fc.getSelectedFile().getPath());
 			}
 		});
 	}

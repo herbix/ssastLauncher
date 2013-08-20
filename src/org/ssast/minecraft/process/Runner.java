@@ -1,19 +1,12 @@
 package org.ssast.minecraft.process;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import org.ssast.minecraft.Config;
-import org.ssast.minecraft.CrashDialog;
 import org.ssast.minecraft.auth.ServerAuth;
-import org.ssast.minecraft.mod.ModManager;
-import org.ssast.minecraft.util.EasyFileAccess;
-import org.ssast.minecraft.util.EasyZipAccess;
 import org.ssast.minecraft.util.HttpFetcher;
 import org.ssast.minecraft.util.Lang;
 import org.ssast.minecraft.util.OS;
@@ -52,22 +45,10 @@ public class Runner {
 			}
 		}
 		
-		String requiredMod = tryDownloadRequiredMod(auth.getClass(), Config.version);
+		String requiredMod = tryDownloadRequiredMod(auth.getClass(), Config.currentProfile.version);
 		if(requiredMod == null) {
 			System.out.println(Lang.getString("msg.mod.required.error"));
 			return false;
-		} else if(!requiredMod.equals("")) {
-			ArrayList<String> classes = new ArrayList<String>();
-			try {
-				EasyZipAccess.addFileListToList(new File(requiredMod), classes);
-				if(ModManager.isClassesLoaded(classes)) {
-					System.out.println(Lang.getString("msg.mod.required.conflict"));
-					return false;
-				}
-			} catch(Exception e) {
-				
-			}
-			requiredMod += System.getProperty("path.separator");
 		}
 		
 		params.add(java);
@@ -77,7 +58,6 @@ public class Runner {
 		
 		params.add("-cp");
 		String cp = requiredMod;
-		cp += ModManager.getModPath(module.getName());
 		if(!cp.equals(""))
 			cp += System.getProperty("path.separator");
 		cp += module.getClassPath();
@@ -102,7 +82,7 @@ public class Runner {
 			} else if(gameParams[i].contains("${version_name}")) {
 				gameParams[i] = module.getName();
 			} else if(gameParams[i].contains("${game_directory}")) {
-				gameParams[i] = Config.gamePath;
+				gameParams[i] = Config.currentProfile.runPath;
 			} else if(gameParams[i].contains("${game_assets}")) {
 				gameParams[i] = Config.gamePath + Config.MINECRAFT_ASSET_PATH;
 			} else if(gameParams[i].contains("${auth_uuid}")) {
@@ -123,45 +103,7 @@ public class Runner {
 			ProcessBuilder pb = new ProcessBuilder(params.toArray(new String[params.size()]));
 			pb.directory(new File(Config.gamePath));
 			pb.redirectErrorStream(true);
-			Process process = pb.start();
-
-			/*
-			BufferedReader r = new BufferedReader(new InputStreamReader(process.getInputStream()));
-			StringBuilder sb = new StringBuilder();
-			String line;
-			while((line = r.readLine()) != null) {
-				System.out.println(line);
-				sb.append(line);
-				sb.append('\n');
-			}
-			r.close();
-			int reply = process.waitFor();
-
-			//if(reply != 0) {
-				CrashDialog cd;
-				long current = new Date().getTime();
-
-				File crashFolder = new File(Config.gamePath + "/crash-reports");
-				if(crashFolder.isDirectory()) {
-					for(File elem : crashFolder.listFiles()) {
-						long modified = elem.lastModified();
-						if(current - modified < 10000) {
-							String crashReport = EasyFileAccess.loadFile(elem.getPath());
-
-							if(crashReport != null) {
-								cd = new CrashDialog();
-								cd.setReport(crashReport);
-								cd.setVisible(true);
-								return;
-							} 
-						}
-					}
-				}
-				cd = new CrashDialog();
-				cd.setReport(Lang.getString("ui.crash.default") + sb.toString());
-				cd.setVisible(true);
-			//}
-			//*/
+			pb.start();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -171,8 +113,8 @@ public class Runner {
 	public static String tryDownloadRequiredMod(Class<? extends ServerAuth> auth, String version) {
 
 		try {
-			String name = (String)auth.getMethod("getRequiredModName", String.class).invoke(null, Config.version);
-			String url = (String)auth.getMethod("getRequiredModUrl", String.class).invoke(null, Config.version);
+			String name = (String)auth.getMethod("getRequiredModName", String.class).invoke(null, Config.currentProfile.version);
+			String url = (String)auth.getMethod("getRequiredModUrl", String.class).invoke(null, Config.currentProfile.version);
 			
 			if(name == null)
 				return "";

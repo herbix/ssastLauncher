@@ -5,15 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
-
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
-
-import org.ssast.minecraft.mod.ModManager;
-import org.ssast.minecraft.auth.AuthType;
 
 import net.minecraft.bootstrap.Util;
 
@@ -51,12 +45,8 @@ public class Config {
 	public static final String MOD_DIR = "mods";
 	public static final String TEMP_DIR = new File(new File(System.getProperty("java.io.tmpdir")), "SSASTLauncher").getPath();
 
-	public static String user = "";
-	public static String pass = "";
-	public static boolean savePass = false;
-	public static String authType = "minecraft";
-	public static String version = "";
-	public static List<String> loadedMod = new ArrayList<String>();
+	public static Profile currentProfile = null;
+	public static Map<String, Profile> profiles = new HashMap<String, Profile>();
 	public static String jrePath = System.getProperty("java.home");
 	public static boolean d64 = false;
 	public static boolean d32 = false;
@@ -64,50 +54,9 @@ public class Config {
 	public static String gamePath = Util.getWorkingDirectory().getPath();
 	public static long lastUpdate = Long.MIN_VALUE;
 	public static long dontUpdateUntil = Long.MIN_VALUE;
-	
-	private static final byte[] magic = {123, 32, 4, 12, 5, 86, 2, 12};
-	
-	private static String encodePass(String pass) {
-		byte[] str = pass.getBytes();
-		
-		for(int i=0; i<str.length; i++) {
-			str[i] ^= magic[i % magic.length];
-		}
-		
-		String result = new BASE64Encoder().encode(str);
-		int equalIndex = result.indexOf('=');
-		if(equalIndex > 0) {
-			result = result.substring(0, equalIndex);
-		}
-		return result;
-	}
-	
-	private static String decodePass(String encoded) {
-		while(encoded.length() % 4 != 0)
-			encoded += "=";
-
-		byte[] str;
-
-		try {
-			str = new BASE64Decoder().decodeBuffer(encoded);
-		} catch (IOException e) {
-			return "";
-		}
-
-		for(int i=0; i<str.length; i++) {
-			str[i] ^= magic[i % magic.length];
-		}
-		
-		return new String(str);
-	}
 
 	public static void saveConfig() {
 		Properties p = new Properties();
-		p.setProperty("user", user);
-		p.setProperty("pass", encodePass(pass));
-		p.setProperty("save-pass", String.valueOf(savePass));
-		p.setProperty("auth-type", String.valueOf(authType));
-		p.setProperty("version", version);
 		p.setProperty("jre-path", jrePath);
 		p.setProperty("d64", String.valueOf(d64));
 		p.setProperty("d32", String.valueOf(d32));
@@ -115,13 +64,14 @@ public class Config {
 		p.setProperty("game-path", gamePath);
 		p.setProperty("last-update", String.valueOf(lastUpdate));
 		p.setProperty("dont-update-until", String.valueOf(dontUpdateUntil));
-		String modarr = "";
-		for(int i=0; i<loadedMod.size(); i++) {
-			if(i != 0)
-				modarr += ",";
-			modarr += loadedMod.get(i);
+		String profileList = "";
+		for(String profileName : profiles.keySet()) {
+			profileList += profileName + ";";
+			p.setProperty("profile-" + profileName, profiles.get(profileName).toSavedString());
 		}
-		p.setProperty("loaded-mod", modarr);
+		p.setProperty("profiles", profileList);
+		p.setProperty("current-profile", currentProfile.profileName);
+		
 		try {
 			FileOutputStream out = new FileOutputStream(CONFIG_FILE);
 			p.store(out, "Created by SSAST Launcher");
@@ -137,13 +87,6 @@ public class Config {
 		try {
 			in = new FileInputStream(CONFIG_FILE);
 			p.load(in);
-			user = p.getProperty("user", "");
-			pass = decodePass(p.getProperty("pass", ""));
-			try {
-				savePass = Boolean.valueOf(p.getProperty("save-pass", "false"));
-			} catch (Exception e) {	}
-			authType = p.getProperty("auth-type", "minecraft");
-			version = p.getProperty("version", "");
 			jrePath = p.getProperty("jre-path", System.getProperty("java.home"));
 			if(jrePath.equals("")) {
 				jrePath = System.getProperty("java.home");
@@ -165,13 +108,24 @@ public class Config {
 			try {
 				dontUpdateUntil = Long.valueOf(p.getProperty("dont-update-until", String.valueOf(Long.MIN_VALUE)));
 			} catch (Exception e) {	}
-			String modstr = p.getProperty("loaded-mod", "");
-			String[] mods = modstr.split(",");
-			for(int i=0; i<mods.length; i++) {
-				mods[i] = mods[i].trim();
-				if(!mods[i].equals(""))
-					loadedMod.add(mods[i].trim());
+
+			profiles.clear();
+			String profileList = p.getProperty("profiles", "");
+			String[] split = profileList.split(";");
+			for(String profileName : split) {
+				if(profileName.equals(""))
+					continue;
+				Profile profile = new Profile(profileName, p.getProperty("profile-" + profileName, null));
+				profiles.put(profileName, profile);
 			}
+			if(!profiles.containsKey("(Default)"))
+				profiles.put("(Default)", new Profile("(Default)", null));
+			
+			String current = p.getProperty("current-profile", "(Default)");
+			currentProfile = profiles.get(current);
+			if(currentProfile == null)
+				currentProfile = profiles.get("(Default)");
+			
 			in.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -179,11 +133,12 @@ public class Config {
 	}
 	
 	public static void updateToFrame(LauncherFrame frame) {
-		frame.user.setText(user);
-		frame.pass.setText(pass);
-		frame.savePass.setSelected(savePass);
-		frame.authType.setSelectedItem(AuthType.valueOf(authType));
-		frame.gameVersion.setSelectedItem(version);
+		frame.profiles.removeAllItems();
+		for(Profile profile : profiles.values()) {
+			frame.profiles.addItem(profile);
+		}
+		frame.profiles.setSelectedItem(currentProfile);
+		currentProfile.updateToFrame(frame);
 		frame.jrePath.setText(jrePath);
 		frame.memorySizeSlider.setValue(memory);
 		if(!d32 && !d64)
@@ -196,15 +151,15 @@ public class Config {
 	}
 
 	public static void updateFromFrame(LauncherFrame frame) {
-		user = frame.user.getText();
-		savePass = frame.savePass.isSelected();
-		if(savePass)
-			pass = frame.pass.getText();
-		else
-			pass = "";
-		authType = ((AuthType)frame.authType.getSelectedItem()).value();
-		if(frame.gameVersion.getSelectedItem() != null)
-			version = frame.gameVersion.getSelectedItem().toString();
+		profiles.clear();
+		for(int i=0; i<frame.profiles.getItemCount(); i++) {
+			Profile profile = (Profile)frame.profiles.getItemAt(i);
+			profiles.put(profile.profileName, profile);
+		}
+		currentProfile = (Profile)frame.profiles.getSelectedItem();
+		if(currentProfile == null)
+			currentProfile = profiles.get("(Default)");
+		currentProfile.updateFromFrame(frame);
 		jrePath = frame.jrePath.getText();
 		if(jrePath.equals("")) {
 			jrePath = System.getProperty("java.home");
@@ -214,9 +169,6 @@ public class Config {
 		try {
 			memory = Integer.valueOf(frame.memorySize.getText());
 		} catch (Exception e) {	}
-		if(version == null)
-			version = "";
-		loadedMod = ModManager.getLoadedMod();
 	}
 
 	static {
