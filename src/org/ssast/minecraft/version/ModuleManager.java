@@ -1,0 +1,119 @@
+package org.ssast.minecraft.version;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.swing.JComboBox;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+
+import org.ssast.minecraft.Config;
+
+public class ModuleManager {
+
+	public static Module[] modules = null;
+
+	private static Map<Integer, Module> moduleFromListItem = new HashMap<Integer, Module>();
+	private static Map<String, Module> moduleFromChioceItem = new HashMap<String, Module>();
+	private static Map<String, Module> moduleFromName = new HashMap<String, Module>();
+
+	public synchronized static void showModules(DefaultTableModel model) {
+		model.setRowCount(0);
+
+		moduleFromListItem.clear();
+		for(int i=1; i<modules.length; i++) {
+			Module m = modules[i];
+			model.addRow(new String[]{ m.getName(), m.getType(), m.getState() });
+			moduleFromListItem.put(i-1, m);
+		}
+	}
+
+	public synchronized static void showModules(JComboBox list) {
+		list.removeAllItems();
+		moduleFromChioceItem.clear();
+		if(!modules[0].isInstalled())
+			return;
+		for(int i=0; i<modules.length; i++) {
+			Module m = modules[i];
+			if(!(m instanceof ResourceModule) && m.isInstalled()) {
+				list.addItem(m.getName());
+				moduleFromChioceItem.put(m.getName(), m);
+			}
+		}
+	}
+
+	public static Module getSelectedModule(JTable table) {
+		return moduleFromListItem.get(table.getSelectedRow());
+	}
+
+	public static RunnableModule getSelectedModule(JComboBox list) {
+		return (RunnableModule)moduleFromChioceItem.get(list.getSelectedItem());
+	}
+
+	public synchronized static void initModules(Map<String, Version> versions,
+		ModuleInstallCallback icallback, ModuleUninstallCallback ucallback) {
+
+		List<Module> moduleList = new ArrayList<Module>();
+
+		Module am = new ResourceModule(icallback, ucallback);
+		if(moduleFromName.containsKey(am.getName()))
+			am = moduleFromName.get(am.getName());
+		moduleList.add(am);
+
+		Set<String> versionIds = versions.keySet();
+		for(String key : versionIds) {
+			Version elem = versions.get(key);
+			RunnableModule rm = new RunnableModule(icallback, ucallback);
+			rm.version = elem;
+			if(moduleFromName.containsKey(rm.getName()))
+				moduleList.add(moduleFromName.get(rm.getName()));
+			else
+				moduleList.add(rm);
+		}
+		
+		File versionFolder = new File(Config.gamePath + "/versions");
+		if(versionFolder.isDirectory()) {
+			for(File inFolder : versionFolder.listFiles()) {
+				if(inFolder.isDirectory() && !versionIds.contains(inFolder.getName())) {
+					
+					File jsonFile = new File(inFolder, inFolder.getName() + ".json");
+					
+					if(jsonFile.isFile()) {
+						Version ver = new Version();
+						ver.id = inFolder.getName();
+						RunnableModule rm = new RunnableModule(icallback, ucallback);
+						rm.version = ver;
+						if(moduleFromName.containsKey(rm.getName()))
+							moduleList.add(moduleFromName.get(rm.getName()));
+						else
+							moduleList.add(rm);
+					}
+					
+				}
+			}
+		}
+
+		Collections.sort(moduleList, new Comparator<Module>(){
+			public int compare(Module o1, Module o2) {
+				return -o1.getReleaseTime().compareTo(o2.getReleaseTime());
+			}
+		});
+
+		modules = moduleList.toArray(new Module[moduleList.size()]);
+		
+		moduleFromName.clear();
+		for(Module m : modules) {
+			moduleFromName.put(m.getName(), m);
+		}
+	}
+	
+	public static Module getAssetsModule() {
+		return modules[0];
+	}
+}

@@ -1,0 +1,99 @@
+
+msg.auth.connecting1=Connecting 
+msg.auth.connecting2=\u0020to check user name and password...
+msg.auth.failed=Authentication failed.
+msg.auth.succeeded=Authentication succeeded.
+msg.auth.noselection=Please select an auth type.
+msg.auth.minelogin.failed.0=Network error.
+msg.auth.minelogin.failed.1=Bad login.
+msg.auth.minelogin.failed.2=Inner error.
+msg.auth.minelogin.failed.3=No such user.
+msg.auth.minelogin.failed.4=Need verify.
+msg.auth.minelogin.failed.5=Bad password.
+msg.auth.skinme.donthavechar=You don't have this character.
+msg.auth.skinme.selectone1=You have more than one characters: 
+msg.auth.skinme.selectone2=. Use "character name:login name" format to login.
+
+msg.download.failed=Failed to download: 
+msg.download.start=Start downloading: 
+msg.download.succeeded=Downloading finished: 
+
+msg.game.basicrequire=You need assets and at least one game module to start game.
+msg.game.nousername=Please input user name.
+msg.game.isloggingin=The system is trying to log in.
+
+msg.mod.alreadyloaded=This mod has been loaded.
+msg.mod.conflict=This mod conflicts with loaded mod(s).
+msg.mod.required.error=This auth type doesn't support this version.
+msg.mod.required.conflict=This auth type uses special mod, which conflicts with loaded mod(s). Try change auth type, or unload some mods.
+msg.mod.noselection=Please select a mod first.
+
+msg.module.alreadyinstalled=This module has been installed. 
+msg.module.failed=Installation failed.
+msg.module.isinstalling=The module is installing.
+msg.module.isuninstalling=The module is uninstalling.
+msg.module.noselection=Please select a module first.
+msg.module.notallowed=This version of minecraft is incompatible with your operating system.
+msg.module.reason=The reason: 
+msg.module.start=Start installation
+msg.module.startuninstall=Start uninstallation
+msg.module.succeeded=Installation finished
+msg.module.uninstallsucceeded=Uninstallation finished
+msg.module.delete=Deleting 
+
+msg.update.request=New version SSAST Launcher is available. Do you want to update?
+msg.update.exception1=Exception occurs: 
+msg.update.exception2=. Updating stopped.
+
+msg.version.downloading=Updating version info...
+msg.version.failed=Unable to update version info.
+msg.version.succeeded=Version info has been updated.
+
+msg.gamepath.error=Unable to use '.minecraft' directory.
+msg.help=\u0020- Compatible with new version minecraft.\n - Easy to inject mods.\n - Manage more than one version of minecraft.\n - Compatible with json type versions.\nBug reporting: fakechaos@sina.com.
+msg.jrepath.error=Unable to run java from specified jre path.
+msg.zip.unzip=Unzipping 
+msg.comingsoon=Cannot do this now.
+
+ui.crash.default=Unable to find minecraft crash report file. This is standard output of minecraft:\n
+ui.crash.title=Minecraft Crashed!
+
+ui.mod.label=Mods: 
+ui.mod.load=Load
+ui.mod.loaded=Loaded
+ui.mod.notloaded=
+ui.mod.unload=Unload
+
+ui.mode.d32=-d32
+ui.mode.d64=-d64
+ui.mode.default=Default
+
+ui.module.install=Install
+ui.module.installed=Installed
+ui.module.label=Versions:
+ui.module.notinstalled=
+ui.module.uninstall=Uninstall
+ui.module.notfinished=Half Installed
+
+ui.table.name=Name
+ui.table.state=State
+ui.table.type=Type
+
+ui.filechooser.title=Choose JRE Path
+ui.update.title=Updating...
+ui.jrepath.label=JRE path:
+ui.launch=Launch
+ui.memory.label=Memory Size(MB):
+ui.offline=Offline
+ui.ok=OK
+ui.cancel=Cancel
+ui.password.label=Password:
+ui.savepassword=Save Login
+ui.username.label=User Name:
+ui.version.label=Version:
+
+ui.auth.type.label=Auth Type:
+ui.auth.type.ssast=SSAST Server
+ui.auth.type.offline=Offline
+ui.auth.type.minecraft=Official
+ui.auth.type.minelogin=MineLogin

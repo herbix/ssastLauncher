@@ -1,0 +1,163 @@
+package org.ssast.minecraft.auth;
+
+import java.util.UUID;
+
+/**
+ * This class defines a method to login minecraft. The classes in
+ * package org.ssast.minecraft.auth which extends ServerAuth will
+ * be adds into auth type combo box. You can choose this method
+ * like predefined methods.
+ * 
+ * @author Chaos
+ * @since SSAST Launcher 1.3.2
+ */
+public abstract class ServerAuth {
+
+	private String name;
+	private String pass;
+	private String session;
+	private String playerName;
+	private String uuid;
+
+	/**
+	 * Login user name and password should be passed to this constructor.
+	 * The class will save these infomation for further use.
+	 * 
+	 * @param name Login user name
+	 * @param pass Login password
+	 */
+	public ServerAuth(String name, String pass) {
+		this.name = name;
+		this.pass = pass;
+		this.playerName = name;
+		this.uuid = new UUID(0, 0).toString();
+		this.session = "-";
+	}
+	
+	/**
+	 * This session string will be passed to minecraft game.
+	 * @return The session
+	 */
+	public String getSession() {
+		return session;
+	}
+	
+	/**
+	 * @return Login user name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @return Login password
+	 */
+	public String getPass() {
+		return pass;
+	}
+
+	/**
+	 * This session string will be passed to minecraft game.
+	 * @param session The session you need to set
+	 *        (default is '-')
+	 */
+	protected void setSession(String session) {
+		this.session = session;
+	}
+
+	/**
+	 * The player name is the name showed in game.
+	 * @param playerName The name you need to set
+	 *        (default is same as login user name)
+	 */
+	protected void setPlayerName(String playerName) {
+		this.playerName = playerName;
+	}
+
+	/**
+	 * The player name is the name showed in game.
+	 * @return The name
+	 */
+	public String getPlayerName() {
+		return playerName;
+	}
+
+	/**
+	 * This uuid will passed to minecraft game (in future).
+	 * @param uuid The uuid you need to set
+	 *        (default is UUID(0, 0))
+	 */
+	protected void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
+	/**
+	 * This uuid will passed to minecraft game (in future).
+	 * @return The uuid
+	 */
+	public String getUuid() {
+		return uuid;
+	}
+	
+	/**
+	 * When login, launcher will call this method. This method
+	 * will run in a new thread, so you can do anything that spents
+	 * time. But don't forget to call callback.authDone method
+	 * when login succeeds or fails.
+	 * 
+	 * @param callback The interface that contains the callback function
+	 * @see org.ssast.minecraft.auth.AuthDoneCallback
+	 */
+	public abstract void login(AuthDoneCallback callback);
+	
+	/**
+	 * When logout, launcher will call this method. If you need
+	 * do something after user close the game, write done here.
+	 */
+	@Deprecated
+	public abstract void logout();
+	
+	/**
+	 * You should override this function to change the name of
+	 * the method.
+	 * @return The auth type name showed in comboBox
+	 */
+	public static String getAuthTypeName() {
+		return "N/A";
+	}
+	
+	/**
+	 * You should override this function to change the alias of
+	 * the method.
+	 * @return Alias of the auth type. Must be constant
+	 */
+	public static String getAlias() {
+		return "N/A";
+	}
+	
+	/**
+	 * SSAST Launcher give you a chance to put your special mod into
+	 * minecraft game when using your auth method. This is the url
+	 * where you should download the mod.
+	 * 
+	 * @param version Specific version of minecraft game
+	 * @return Url from which you can download the mod
+	 */
+	public static String getRequiredModUrl(String version) {
+		return null;
+	}
+
+	/**
+	 * SSAST Launcher give you a chance to put your special mod into
+	 * minecraft game when using your auth method. This is the name
+	 * used when saved on disc. If you have different version, don't
+	 * use a same name.
+	 * 
+	 * @param version Specific version of minecraft game
+	 * @return Name saved on disc, for example 'SSAST_1.6.2.zip'
+	 */
+	public static String getRequiredModName(String version) {
+		return null;
+	}
+
+}
