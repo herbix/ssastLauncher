@@ -54,6 +54,8 @@ public class UpdaterLater {
 				e.printStackTrace();
 			}
 		}
+		
+		realFile.setExecutable(true);
 
 		String java = System.getProperty("java.home") + "/bin/java";
 		

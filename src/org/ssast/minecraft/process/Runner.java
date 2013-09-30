@@ -60,7 +60,7 @@ public class Runner {
 		String cp = requiredMod;
 		if(!cp.equals(""))
 			cp += System.getProperty("path.separator");
-		cp += module.getClassPath();
+		cp += module.getClassPath(!cp.equals(""));
 
 		params.add(cp);
 		

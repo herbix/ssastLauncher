@@ -43,8 +43,8 @@ public class Updater {
 	private boolean getRemoteFileList() throws Exception {
 		Thread downloadFile = new Thread() {
 			public void run() {
+				fileList = HttpFetcher.fetch("http://minecraft.ssast.org/filelist.php");
 				synchronized (lock) {
-					fileList = HttpFetcher.fetch("http://minecraft.ssast.org/filelist.php");
 					fileListGot = true;
 					lock.notify();
 				}
@@ -55,11 +55,8 @@ public class Updater {
 			downloadFile.start();
 			lock.wait(500);
 		}
-
-		if(!fileListGot)
-			return false;
 		
-		return true;
+		return fileListGot;
 	}
 	
 	private JSONObject getLauncherJarInfo() {
@@ -141,7 +138,7 @@ public class Updater {
 			
 			int selection = JOptionPane.showConfirmDialog(null, Lang.getString("msg.update.request"), "SSAST Launcher", JOptionPane.YES_NO_OPTION);
 			if(selection == JOptionPane.NO_OPTION) {
-				Config.dontUpdateUntil = new Date().getTime() + 7 * 25 * 60 * 60 * 1000;
+				Config.dontUpdateUntil = new Date().getTime() + 7 * 24 * 60 * 60 * 1000;
 				return;
 			}
 			

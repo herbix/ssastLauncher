@@ -307,7 +307,7 @@ public class RunnableModule extends Module {
 		return moduleInfo.mainClass;
 	}
 	
-	public String getClassPath() {
+	public String getClassPath(boolean useRunPath) {
 		StringBuilder sb = new StringBuilder();
 		String separator = System.getProperty("path.separator");
 		
@@ -321,7 +321,11 @@ public class RunnableModule extends Module {
 			sb.append(separator);
 		}
 
-		sb.append(getModuleJarRunPath().replace('/', System.getProperty("file.separator").charAt(0)));
+		if(useRunPath) {
+			sb.append(getModuleJarRunPath().replace('/', System.getProperty("file.separator").charAt(0)));
+		} else {
+			sb.append(getModuleJarPath().replace('/', System.getProperty("file.separator").charAt(0)));
+		}
 		sb.append(separator);
 
 		if(sb.length() > 0)

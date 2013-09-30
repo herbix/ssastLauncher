@@ -98,7 +98,8 @@ public class EasyZipAccess {
 	public static boolean generateJar(String fileName, String source, String filePrefix) {
 		try {
 			JarOutputStream toAdd = new JarOutputStream(new FileOutputStream(fileName));
-			if(source.endsWith("/")) {
+			source = source.replace('/', System.getProperty("file.separator").charAt(0));
+			if(source.endsWith(System.getProperty("file.separator"))) {
 				source = source.substring(0, source.length() - 1);
 			}
 			addAll(toAdd, source, source, filePrefix);
@@ -112,25 +113,24 @@ public class EasyZipAccess {
 	
 	private static void addAll(JarOutputStream zip, String filePath, String base, String filePrefix) throws Exception {
 		File file = new File(filePath);
-
+		
 		if(file.isDirectory()) {
 
 			File[] list = file.listFiles();
 			
 			for(int i=0; i<list.length; i++)
-				addAll(zip, filePath + "/" + list[i].getName(), base, filePrefix);
+				addAll(zip, filePath + System.getProperty("file.separator") + list[i].getName(), base, filePrefix);
 
 		} else {
+
 			if(!file.getName().startsWith(filePrefix))
 				return;
-
-			DataInputStream in = new DataInputStream(new FileInputStream(file));
-
-			String name = file.getPath().substring(base.length() + 1);
+		
+			String name = filePath.substring(base.length() + 1);
 			int lastIndex = name.lastIndexOf(System.getProperty("file.separator")) + 1;
 			String prefixedName = "";
 			
-			if(lastIndex != -1) {
+			if(lastIndex != 0) {
 				prefixedName = name.substring(0, lastIndex);
 			}
 			
@@ -139,7 +139,8 @@ public class EasyZipAccess {
 			prefixedName = prefixedName.replace(System.getProperty("file.separator").charAt(0), '/');
 			
 			zip.putNextEntry(new JarEntry(prefixedName));
-			
+
+			DataInputStream in = new DataInputStream(new FileInputStream(file));
 			int count = 1;
 			byte[] buffer = new byte[4096];
 			while(count >= 0) {
@@ -151,6 +152,7 @@ public class EasyZipAccess {
 			
 			in.close();
 		}
+		
 	}
 	
 	public static void addFileListToList(File f, List<String> Innerlist) throws Exception {
