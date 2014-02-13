@@ -28,7 +28,7 @@ import org.ssast.minecraft.version.Version;
 
 public class Launcher {
 
-	private static final String helpWords = "SSAST Launcher V1.5.2\n" + Lang.getString("msg.help");
+	private static final String helpWords = "SSAST Launcher V1.6.0\n" + Lang.getString("msg.help");
 
 	private LauncherFrame frame = null;
 
@@ -126,9 +126,6 @@ public class Launcher {
 				if(versionList == null)
 					return;
 				ModuleManager.initModules(versionList, mcallback, mcallback);
-				if(!ModuleManager.getAssetsModule().isInstalled()) {
-					ModuleManager.getAssetsModule().install();
-				}
 				refreshComponentsList();
 			} else {
 				System.out.println(Lang.getString("msg.version.failed"));

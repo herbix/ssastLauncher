@@ -40,7 +40,7 @@ public enum OS {
 		if(!osName.equals(getCurrentPlatform().getName())) {
 			return false;
 		}
-		if(!System.getProperty("os.version").matches(osVersion)) {
+		if(osVersion != null && !System.getProperty("os.version").matches(osVersion)) {
 			return false;
 		}
 		return true;

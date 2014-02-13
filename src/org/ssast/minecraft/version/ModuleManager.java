@@ -27,21 +27,19 @@ public class ModuleManager {
 		model.setRowCount(0);
 
 		moduleFromListItem.clear();
-		for(int i=1; i<modules.length; i++) {
+		for(int i=0; i<modules.length; i++) {
 			Module m = modules[i];
 			model.addRow(new String[]{ m.getName(), m.getType(), m.getState() });
-			moduleFromListItem.put(i-1, m);
+			moduleFromListItem.put(i, m);
 		}
 	}
 
 	public synchronized static void showModules(JComboBox list) {
 		list.removeAllItems();
 		moduleFromChioceItem.clear();
-		if(!modules[0].isInstalled())
-			return;
 		for(int i=0; i<modules.length; i++) {
 			Module m = modules[i];
-			if(!(m instanceof ResourceModule) && m.isInstalled()) {
+			if(m.isInstalled()) {
 				list.addItem(m.getName());
 				moduleFromChioceItem.put(m.getName(), m);
 			}
@@ -60,11 +58,6 @@ public class ModuleManager {
 		ModuleInstallCallback icallback, ModuleUninstallCallback ucallback) {
 
 		List<Module> moduleList = new ArrayList<Module>();
-
-		Module am = new ResourceModule(icallback, ucallback);
-		if(moduleFromName.containsKey(am.getName()))
-			am = moduleFromName.get(am.getName());
-		moduleList.add(am);
 
 		Set<String> versionIds = versions.keySet();
 		for(String key : versionIds) {
@@ -111,9 +104,5 @@ public class ModuleManager {
 		for(Module m : modules) {
 			moduleFromName.put(m.getName(), m);
 		}
-	}
-	
-	public static Module getAssetsModule() {
-		return modules[0];
 	}
 }

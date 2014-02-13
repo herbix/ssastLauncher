@@ -3,6 +3,8 @@ package org.ssast.minecraft.util;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -66,5 +68,23 @@ public class EasyFileAccess {
 		if(file.exists())
 			result &= file.delete();
 		return result;
+	}
+
+	public static boolean copyFile(File file, File targetFile) {
+		try {
+			FileInputStream in = new FileInputStream(file);
+			targetFile.getParentFile().mkdirs();
+			FileOutputStream out = new FileOutputStream(targetFile);
+
+			int len = 0;
+			byte[] buffer = new byte[65536];
+			while((len = in.read(buffer)) >= 0) {
+				out.write(buffer, 0, len);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
 	}
 }

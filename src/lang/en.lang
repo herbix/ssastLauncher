@@ -57,6 +57,9 @@ msg.help=\u0020- Compatible with new version minecraft.\n - Easy to inject mods.
 msg.jrepath.error=Unable to run java from specified jre path.
 msg.zip.unzip=Unzipping 
 msg.comingsoon=Cannot do this now.
+msg.assets.cannotload=Cannot load assets files.
+msg.run.unknownparam1=There is no param "
+msg.run.unknownparam2=".
 
 ui.crash.default=Unable to find minecraft crash report file. This is standard output of minecraft:\n
 ui.crash.title=Minecraft Crashed!

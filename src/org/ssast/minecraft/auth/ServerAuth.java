@@ -1,5 +1,8 @@
 package org.ssast.minecraft.auth;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -18,6 +21,8 @@ public abstract class ServerAuth {
 	private String session;
 	private String playerName;
 	private String uuid;
+	private String userType;
+	private Map<String, Collection<String>> userProperties = new HashMap<String, Collection<String>>();
 
 	/**
 	 * Login user name and password should be passed to this constructor.
@@ -32,6 +37,7 @@ public abstract class ServerAuth {
 		this.playerName = name;
 		this.uuid = new UUID(0, 0).toString();
 		this.session = "-";
+		this.setUserType("legacy");
 	}
 	
 	/**
@@ -158,6 +164,27 @@ public abstract class ServerAuth {
 	 */
 	public static String getRequiredModName(String version) {
 		return null;
+	}
+
+	/**
+	 * @param userType User type to be set
+	 */
+	public void setUserType(String userType) {
+		this.userType = userType;
+	}
+
+	/**
+	 * @return Current user type
+	 */
+	public String getUserType() {
+		return userType;
+	}
+
+	/**
+	 * @return Current user properties
+	 */
+	public Map<String, Collection<String>> getUserProperties() {
+		return userProperties;
 	}
 
 }

@@ -3,8 +3,13 @@ package org.ssast.minecraft.process;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.json.JSONObject;
 import org.ssast.minecraft.Config;
 import org.ssast.minecraft.auth.ServerAuth;
 import org.ssast.minecraft.util.HttpFetcher;
@@ -73,27 +78,65 @@ public class Runner {
 		
 		params.add(module.getMainClass());
 		
+		Map<String, String> valueMap = new HashMap<String, String>();
+		
+		valueMap.put("auth_access_token", auth.getSession());
+		valueMap.put("user_properties", new JSONObject(auth.getUserProperties()).toString());
+
+		valueMap.put("auth_session", auth.getSession());
+
+		valueMap.put("auth_player_name", auth.getPlayerName());
+		valueMap.put("auth_uuid", auth.getUuid());
+		valueMap.put("user_type", auth.getUserType());
+		
+		valueMap.put("profile_name", Config.currentProfile.profileName);
+		valueMap.put("version_name", module.getName());
+
+		valueMap.put("game_directory", Config.currentProfile.runPath);
+		valueMap.put("game_assets", Config.gamePath + Config.MINECRAFT_VIRTUAL_PATH);
+
+		valueMap.put("assets_root", Config.gamePath + Config.MINECRAFT_ASSET_PATH);
+		valueMap.put("assets_index_name", module.getAssetsIndex());
+		
 		String[] gameParams = module.getRunningParams();
-		for(int i=0; i<gameParams.length; i++) {
-			if(gameParams[i].contains("${auth_player_name}")) {
-				gameParams[i] = auth.getPlayerName();
-			} else if(gameParams[i].contains("${auth_session}")) {
-				gameParams[i] = auth.getSession();
-			} else if(gameParams[i].contains("${version_name}")) {
-				gameParams[i] = module.getName();
-			} else if(gameParams[i].contains("${game_directory}")) {
-				gameParams[i] = Config.currentProfile.runPath;
-			} else if(gameParams[i].contains("${game_assets}")) {
-				gameParams[i] = Config.gamePath + Config.MINECRAFT_ASSET_PATH;
-			} else if(gameParams[i].contains("${auth_uuid}")) {
-				gameParams[i] = auth.getUuid();
-			} else if(gameParams[i].contains("${auth_username}")) {
-				gameParams[i] = auth.getName();
-			}
+		if(!replaceParams(gameParams, valueMap)) {
+			return false;
+		}
+		
+		if(module.isAssetsVirtual() && !module.copyAssetsToVirtual()) {
+			System.out.println(Lang.getString("msg.assets.cannotload"));
+			return false;
 		}
 		
 		params.addAll(Arrays.asList(gameParams));
 		
+		return true;
+	}
+	
+	private static final Pattern paramPattern = Pattern.compile("\\$\\{([a-zA-Z0-9_]*)\\}");
+	
+	private boolean replaceParams(String[] gameParams, Map<String, String> map) {
+		StringBuilder sb = new StringBuilder();
+		for(int i=0; i<gameParams.length; i++) {
+			String param = gameParams[i];
+			Matcher m = paramPattern.matcher(param);
+			int lastend = 0;
+			sb.setLength(0);
+			while(m.find()) {
+				sb.append(param, lastend, m.start());
+				String key = m.group(1);
+				String value = map.get(key);
+				if(value == null) {
+					System.out.println(Lang.getString("msg.run.unknownparam1") +
+							key + Lang.getString("msg.run.unknownparam2"));
+					return false;
+				}
+				sb.append(value);
+				lastend = m.end();
+			}
+			sb.append(param, lastend, param.length());
+			gameParams[i] = sb.toString();
+		}
 		return true;
 	}
 	

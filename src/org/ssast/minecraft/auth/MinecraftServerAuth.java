@@ -41,6 +41,7 @@ public class MinecraftServerAuth extends ServerAuth {
 		setSession(split[3]);
 		setUuid(split[4]);
 		setPlayerName(split[2]);
+		setUserType("legacy");
 		callback.authDone(this, true);
 
 	}

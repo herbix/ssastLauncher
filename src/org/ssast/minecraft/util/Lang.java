@@ -1,5 +1,6 @@
 package org.ssast.minecraft.util;
 
+import java.io.InputStreamReader;
 import java.util.Properties;
 
 /**
@@ -52,6 +53,10 @@ public class Lang {
 	private static boolean loadLangResource(String resource, Properties properties) {
 		try {
 			properties.load(Lang.class.getResourceAsStream(resource));
+			String encoding = properties.getProperty("encoding", null);
+			if(encoding != null) {
+				properties.load(new InputStreamReader(Lang.class.getResourceAsStream(resource), encoding));
+			}
 		} catch (Exception e) {
 			return false;
 		}

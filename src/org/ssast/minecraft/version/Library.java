@@ -55,7 +55,8 @@ public class Library {
 
 		if(nativesMap != null) {
 			String osName = OS.getCurrentPlatform().getName();
-			result += "-natives-" + osName;
+			String arch = System.getProperty("os.arch").equals("x86") ? "32" : "64";
+			result += "-" + nativesMap.getString(osName).replaceAll("\\$\\{arch\\}", arch);
 		}
 
 		result += ".jar";
@@ -71,7 +72,7 @@ public class Library {
 		if(url != null)
 			return url + getKey();
 		else
-			return Config.MINECRAFT_DOWNLOAD_BASE + "/libraries/" + getKey();
+			return Config.MINECRAFT_DOWNLOAD_LIBRARY + "/" + getKey();
 	}
 	
 	public String getRealFilePath() {

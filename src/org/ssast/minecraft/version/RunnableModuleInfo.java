@@ -12,20 +12,18 @@ public class RunnableModuleInfo {
 	public String[] minecraftArguments;
 	public String time;
 	public String mainClass;
-	public String processArguments;
 	public String releaseTime;
 	public String type;
 	public String incompatibilityReason;
 	public List<Library> libraries;
 	public List<Rule> rules;
+	public String assets;
 	
 	public RunnableModuleInfo(JSONObject json) {
 		id = json.getString("id");
-		minecraftArguments = json.getString("minecraftArguments").split(" ");
+		minecraftArguments = json.getString("minecraftArguments").split("[\\s]+");
 		time = json.getString("time");
 		mainClass = json.getString("mainClass");
-		if(json.has("processArguments"))
-			processArguments = json.getString("processArguments");
 		releaseTime = json.getString("releaseTime");
 		type = json.getString("type");
 		if(json.has("incompatibilityReason"))
@@ -43,6 +41,12 @@ public class RunnableModuleInfo {
 			for(int i=0; i<rls.length(); i++) {
 				rules.add(new Rule(rls.getJSONObject(i)));
 			}
+		}
+
+		if(json.has("assets")) {
+			this.assets = json.getString("assets");
+		} else {
+			this.assets = "legacy";
 		}
 	}
 	

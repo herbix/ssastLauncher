@@ -17,14 +17,22 @@ public class Config {
 
 	public static final String MINECRAFT_DOWNLOAD_BASE = 
 		"https://s3.amazonaws.com/Minecraft.Download";
+	public static final String MINECRAFT_DOWNLOAD_LIBRARY =
+		"https://libraries.minecraft.net";
 	public static final String MINECRAFT_RESOURCE_BASE =
-		"https://s3.amazonaws.com/Minecraft.Resources";
+		"http://resources.download.minecraft.net";
 	public static final String MINECRAFT_VERSION_FILE = 
 		"/versions/versions.json";
 	public static final String MINECRAFT_VERSION_PATH = 
 		"/versions";
 	public static final String MINECRAFT_ASSET_PATH =
 		"/assets";
+	public static final String MINECRAFT_OBJECTS_PATH =
+		"/assets/objects";
+	public static final String MINECRAFT_INDEXES_PATH =
+		"/assets/indexes";
+	public static final String MINECRAFT_VIRTUAL_PATH =
+		"/assets/virtual";
 	public static final String MINECRAFT_VERSION_FORMAT =
 		"/versions/%s/%s.json";
 	public static final String MINECRAFT_VERSION_GAME_FORMAT =
@@ -35,12 +43,6 @@ public class Config {
 		"/versions/%s/%s_temp/";
 	public static final String MINECRAFT_VERSION_GAME_EXTRACT_FORMAT =
 		"/versions/%s/%s/";
-	public static final String MINECRAFT_LIBRARY_FORMAT =
-		"/libraries/%s/%s/%s/%s-%s.jar";
-	public static final String MINECRAFT_LIBRARY_NATIVE_FORMAT =
-		"/libraries/%s/%s/%s/%s-%s-%s.jar";
-	public static final String MINECRAFT_RESOURCE_FILE =
-		"/assets/assets.json";
 
 	public static final String MOD_DIR = "mods";
 	public static final String TEMP_DIR = new File(new File(System.getProperty("java.io.tmpdir")), "SSASTLauncher").getPath();
@@ -84,6 +86,10 @@ public class Config {
 	public static void loadConfig() {
 		InputStream in;
 		Properties p = new Properties();
+
+		profiles.put("(Default)", new Profile("(Default)", null));
+		currentProfile = profiles.get("(Default)");
+		
 		try {
 			in = new FileInputStream(CONFIG_FILE);
 			p.load(in);
@@ -118,13 +124,9 @@ public class Config {
 				Profile profile = new Profile(profileName, p.getProperty("profile-" + profileName, null));
 				profiles.put(profileName, profile);
 			}
-			if(!profiles.containsKey("(Default)"))
-				profiles.put("(Default)", new Profile("(Default)", null));
 			
 			String current = p.getProperty("current-profile", "(Default)");
 			currentProfile = profiles.get(current);
-			if(currentProfile == null)
-				currentProfile = profiles.get("(Default)");
 			
 			in.close();
 		} catch (IOException e) {

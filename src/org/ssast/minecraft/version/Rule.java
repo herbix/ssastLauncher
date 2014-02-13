@@ -19,7 +19,10 @@ public class Rule {
 		if(json.has("os")) {
 			JSONObject os = json.getJSONObject("os");
 			osName = os.getString("name");
-			osVersion = os.getString("version");
+			if(os.has("version"))
+				osVersion = os.getString("version");
+			else
+				osVersion = null;
 		}
 	}
 	
