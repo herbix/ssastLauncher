@@ -59,7 +59,7 @@ public class SkinMeServerAuth extends ServerAuth {
 					callback.authDone(this, false);
 				} else {
 					setPlayerName(split[0]);
-					setSession(split[1]);
+					setAccessToken(split[1]);
 					callback.authDone(this, true);
 				}
 			}
@@ -123,7 +123,7 @@ public class SkinMeServerAuth extends ServerAuth {
 							callback.authDone(this, false);
 						} else {
 							setPlayerName(split[0]);
-							setSession(split[1]);
+							setAccessToken(split[1]);
 							callback.authDone(this, true);
 						}
 

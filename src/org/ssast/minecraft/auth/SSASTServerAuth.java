@@ -42,7 +42,7 @@ public class SSASTServerAuth extends ServerAuth {
 			return;
 		}
 
-		setSession(result.trim());
+		setAccessToken(result.trim());
 		callback.authDone(SSASTServerAuth.this, true);
 	}
 	

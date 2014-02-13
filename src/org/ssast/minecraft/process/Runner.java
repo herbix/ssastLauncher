@@ -80,7 +80,7 @@ public class Runner {
 		
 		Map<String, String> valueMap = new HashMap<String, String>();
 		
-		valueMap.put("auth_access_token", auth.getSession());
+		valueMap.put("auth_access_token", auth.getAccessToken());
 		valueMap.put("user_properties", new JSONObject(auth.getUserProperties()).toString());
 
 		valueMap.put("auth_session", auth.getSession());
@@ -157,10 +157,11 @@ public class Runner {
 
 		try {
 			String name = (String)auth.getMethod("getRequiredModName", String.class).invoke(null, Config.currentProfile.version);
-			String url = (String)auth.getMethod("getRequiredModUrl", String.class).invoke(null, Config.currentProfile.version);
 			
 			if(name == null)
 				return "";
+			
+			String url = (String)auth.getMethod("getRequiredModUrl", String.class).invoke(null, Config.currentProfile.version);
 			
 			String modFileStr = "mods/required/" + (String)auth.getDeclaredMethod("getAlias").invoke(null) + "/" + name;
 			File modFile = new File(modFileStr);

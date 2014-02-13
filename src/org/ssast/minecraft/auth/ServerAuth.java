@@ -18,7 +18,7 @@ public abstract class ServerAuth {
 
 	private String name;
 	private String pass;
-	private String session;
+	private String accessToken;
 	private String playerName;
 	private String uuid;
 	private String userType;
@@ -36,7 +36,7 @@ public abstract class ServerAuth {
 		this.pass = pass;
 		this.playerName = name;
 		this.uuid = new UUID(0, 0).toString();
-		this.session = "-";
+		this.accessToken = "-";
 		this.setUserType("legacy");
 	}
 	
@@ -45,7 +45,15 @@ public abstract class ServerAuth {
 	 * @return The session
 	 */
 	public String getSession() {
-		return session;
+		return accessToken;
+	}
+
+	/**
+	 * This session string will be passed to minecraft game.
+	 * @return The session
+	 */
+	public String getAccessToken() {
+		return accessToken;
 	}
 	
 	/**
@@ -64,11 +72,22 @@ public abstract class ServerAuth {
 
 	/**
 	 * This session string will be passed to minecraft game.
-	 * @param session The session you need to set
+	 * @param accessToken The access token you need to set
 	 *        (default is '-')
 	 */
+	protected void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
+	}
+
+	/**
+	 * This session string will be passed to minecraft game.
+	 * @param session The session token you need to set
+	 *        (default is '-')
+	 * @Deprecated use setAccessToken instead
+	 */
+	@Deprecated
 	protected void setSession(String session) {
-		this.session = session;
+		this.accessToken = session;
 	}
 
 	/**
@@ -169,7 +188,7 @@ public abstract class ServerAuth {
 	/**
 	 * @param userType User type to be set
 	 */
-	public void setUserType(String userType) {
+	protected void setUserType(String userType) {
 		this.userType = userType;
 	}
 
