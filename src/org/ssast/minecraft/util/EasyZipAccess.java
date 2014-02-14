@@ -95,6 +95,64 @@ public class EasyZipAccess {
 		return true;
 	}
 	
+	public static boolean checkHasAll(String fileName, String dest, List<String> excludes, String filePrefix) {
+
+		try {
+			ZipFile toUnZip = new ZipFile(fileName);
+			Enumeration<? extends ZipEntry> list = toUnZip.entries();
+			ZipEntry fileInZip;
+			
+			while(list.hasMoreElements()) {
+				fileInZip = list.nextElement();
+				if(fileInZip.isDirectory())
+					continue;
+				String name = fileInZip.getName();
+				
+				if(excludes != null) {
+
+					boolean inExclude = false;
+					for(String s : excludes) {
+						if(s.endsWith("/")) {
+							if(name.startsWith(s)) {
+								inExclude = true;
+								break;
+							}
+						} else {
+							if(name.equals(s)) {
+								inExclude = true;
+								break;
+							}
+						}
+					}
+					
+					if(inExclude)
+						continue;
+				}
+				
+				int lastIndex = name.lastIndexOf('/') + 1;
+				String prefixedName = "";
+				
+				if(lastIndex != -1) {
+					prefixedName = name.substring(0, lastIndex);
+				}
+				
+				prefixedName += filePrefix;
+				prefixedName += name.substring(lastIndex);
+				
+				File extractedFileReal = new File(dest + prefixedName);
+				
+				if(!extractedFileReal.exists()) {
+					return false;
+				}
+			}
+
+		} catch (Exception e) {
+			return false;
+		}
+		
+		return true;
+	}
+	
 	public static boolean generateJar(String fileName, String source, String filePrefix) {
 		try {
 			JarOutputStream toAdd = new JarOutputStream(new FileOutputStream(fileName));

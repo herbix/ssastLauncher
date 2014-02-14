@@ -104,14 +104,7 @@ public class RunnableModule extends Module {
 					file.renameTo(fileReal);
 					
 					if(lib != null && lib.needExtract()) {
-						System.out.println(Lang.getString("msg.zip.unzip") + lib.getKey());
-						
-						List<String> excludes = lib.getExtractExclude();
-						String extractBase = lib.getNativeExtractedPath() + "/";
-						new File(extractBase).mkdirs();
-
-						EasyZipAccess.extractZip(fileReal.getPath(), 
-							lib.getExtractTempPath() + "/", extractBase, excludes, "");
+						extractLib(lib, fileReal);
 					}
 
 					if(queueEmpty) {
@@ -123,6 +116,17 @@ public class RunnableModule extends Module {
 				System.out.println(Lang.getString("msg.module.failed") + "[" + getName() + "]");
 			}
 		}
+	}
+
+	private void extractLib(Library lib, File fileReal) {
+		System.out.println(Lang.getString("msg.zip.unzip") + lib.getKey());
+		
+		List<String> excludes = lib.getExtractExclude();
+		String extractBase = lib.getNativeExtractedPath() + "/";
+		new File(extractBase).mkdirs();
+
+		EasyZipAccess.extractZip(fileReal.getPath(), 
+			lib.getExtractTempPath() + "/", extractBase, excludes, "");
 	}
 
 	private void checkModuleAssets() {
@@ -155,9 +159,14 @@ public class RunnableModule extends Module {
 		for(Library lib : moduleInfo.libraries) {
 			if(!lib.needDownloadInOS())
 				continue;
-
-			if(new File(lib.getRealFilePath()).isFile())
+			
+			File realFile = new File(lib.getRealFilePath());
+			if(realFile.isFile()) {
+				if(lib.needExtract()) {
+					extractLib(lib, realFile);
+				}
 				continue;
+			}
 
 			new File(lib.getTempFilePath()).getParentFile().mkdirs();
 			new File(lib.getRealFilePath()).getParentFile().mkdirs();
@@ -353,12 +362,21 @@ public class RunnableModule extends Module {
 				for(Library lib : moduleInfo.libraries) {
 					if(!lib.needDownloadInOS())
 						continue;
-		
-					String path = lib.getRealFilePath();
 
-					if(!new File(path).isFile()) {
+					String path = lib.getRealFilePath();
+					File realFile = new File(path);
+
+					if(!realFile.isFile()) {
 						installState = 0;
 						return false;
+					} else if(lib.needExtract()) {
+						List<String> excludes = lib.getExtractExclude();
+						String extractBase = lib.getNativeExtractedPath() + "/";
+						if(!EasyZipAccess.checkHasAll(realFile.getPath(), 
+								extractBase, excludes, "")) {
+							installState = 0;
+							return false;
+						}
 					}
 				}
 				
