@@ -447,7 +447,7 @@ public class RunnableModule extends Module {
 		
 		for(int i=0; i<moduleInfo.libraries.size(); i++) {
 			Library lib = moduleInfo.libraries.get(i);
-			if(!lib.needExtract())
+			if(!lib.needDownloadInOS() || !lib.needExtract())
 				continue;
 			sb.append(lib.getNativeExtractedPath().replace('/', System.getProperty("file.separator").charAt(0)));
 			sb.append(separator);
