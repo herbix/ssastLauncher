@@ -54,6 +54,7 @@ public class Config {
 	public static boolean d32 = false;
 	public static int memory = 1024;
 	public static String gamePath = Util.getWorkingDirectory().getPath();
+	public static String gamePathOld = gamePath;
 	public static long lastUpdate = Long.MIN_VALUE;
 	public static long dontUpdateUntil = Long.MIN_VALUE;
 	public static boolean showDebugInfo = false;
@@ -64,7 +65,7 @@ public class Config {
 		p.setProperty("d64", String.valueOf(d64));
 		p.setProperty("d32", String.valueOf(d32));
 		p.setProperty("memory", String.valueOf(memory));
-		p.setProperty("game-path", gamePath);
+		p.setProperty("game-path", gamePathOld);
 		p.setProperty("last-update", String.valueOf(lastUpdate));
 		p.setProperty("dont-update-until", String.valueOf(dontUpdateUntil));
 		String profileList = "";
@@ -108,7 +109,8 @@ public class Config {
 			try {
 				memory = Integer.valueOf(p.getProperty("memory", "1024"));
 			} catch (Exception e) {	}
-			gamePath = p.getProperty("game-path", Util.getWorkingDirectory().getPath());
+			gamePathOld = p.getProperty("game-path", Util.getWorkingDirectory().getPath());
+			gamePath = new File(gamePathOld).getAbsolutePath();
 			try {
 				lastUpdate = Long.valueOf(p.getProperty("last-update", String.valueOf(Long.MIN_VALUE)));
 			} catch (Exception e) {	}
@@ -128,10 +130,6 @@ public class Config {
 			
 			String current = p.getProperty("current-profile", "(Default)");
 			currentProfile = profiles.get(current);
-
-			try {
-				showDebugInfo = Boolean.valueOf(p.getProperty("show-debug", "false"));
-			} catch (Exception e) {	}
 			
 			in.close();
 		} catch (IOException e) {
