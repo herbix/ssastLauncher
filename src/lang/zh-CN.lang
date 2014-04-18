@@ -13,8 +13,6 @@ msg.auth.minelogin.failed.3=MineLogin用户不存在，请注册
 msg.auth.minelogin.failed.4=MineLogin需要验证
 msg.auth.minelogin.failed.5=MineLogin密码错误
 msg.auth.skinme.donthavechar=你的账号中没有这个角色
-msg.auth.skinme.selectone1=你的账号中有多个角色：
-msg.auth.skinme.selectone2=。请使用“角色名:账号”的格式登录。
 
 msg.download.failed=下载失败：
 msg.download.start=开始下载：
@@ -58,7 +56,7 @@ msg.profile.exists=此配置已存在
 msg.profile.inputname=输入新配置的名称：
 
 msg.gamepath.error=无法使用.minecraft目录！
-msg.help= - 新版启动器\u000a - 支持mod注入\u000a - 支持不同版本minecraft运行\u000a - 支持需要json读取的版本\u000a如果有bug请联系fakechaos@sina.com
+msg.help=\u0020- 新版启动器\u000a - 支持mod注入\u000a - 支持不同版本minecraft运行\u000a - 支持需要json读取的版本\u000a如果有bug请联系fakechaos@sina.com
 msg.jrepath.error=无法启动java，请检查jre路径
 msg.zip.unzip=解压
 msg.comingsoon=暂未开放此功能
@@ -100,6 +98,10 @@ ui.profile.remove=删除配置
 ui.runpath.label=工作路径（储存存档，设置等）
 ui.runpath.filechooser.title=选择工作路径
 
+ui.char.title=选择角色
+ui.char.ok=确定
+ui.char.cancel=取消
+
 ui.update.title=正在更新...
 ui.launch=进入游戏
 ui.memory.label=使用内存大小(MB)：
@@ -114,5 +116,6 @@ ui.version.label=游戏版本
 ui.auth.type.label=登录方式
 ui.auth.type.ssast=SSAST服务器
 ui.auth.type.offline=离线模式
-ui.auth.type.minecraft=正版
+ui.auth.type.minecraft=正版（旧）
 ui.auth.type.minelogin=MineLogin
+ui.auth.type.yggdrasil=正版

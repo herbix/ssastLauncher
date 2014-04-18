@@ -11,7 +11,7 @@ public class AuthType {
 	private static List<AuthType> values = new ArrayList<AuthType>();
 
 	static {
-		new AuthType(MinecraftServerAuth.class);
+		new AuthType(MinecraftYggdrasilAuth.class);
 		new AuthType(OfflineServerAuth.class);
 		
 		Class<?>[] authClasses = ClassUtil.getClassesFromPackage("org.ssast.minecraft.auth", false);
@@ -19,8 +19,8 @@ public class AuthType {
 		for(Class<?> authClass : authClasses) {
 			if(authClass.getSuperclass() != null &&
 				authClass.getSuperclass().equals(ServerAuth.class) &&
-				!authClass.equals(MinecraftServerAuth.class) &&
-				!authClass.equals(OfflineServerAuth.class)) {
+				!authClass.equals(OfflineServerAuth.class) &&
+				!authClass.equals(MinecraftYggdrasilAuth.class)) {
 				new AuthType(authClass);
 			}
 		}

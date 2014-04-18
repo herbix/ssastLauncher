@@ -1,6 +1,9 @@
 package org.ssast.minecraft.process;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -146,7 +149,17 @@ public class Runner {
 			ProcessBuilder pb = new ProcessBuilder(params.toArray(new String[params.size()]));
 			pb.directory(new File(Config.gamePath));
 			pb.redirectErrorStream(true);
-			pb.start();
+			Process p = pb.start();
+			if(Config.showDebugInfo) {
+				OutputStream out = new FileOutputStream("last.log");
+				InputStream in = p.getInputStream();
+				byte[] buffer = new byte[65536];
+				int n;
+				while((n = in.read(buffer)) >= 0) {
+					out.write(buffer, 0, n);
+				}
+				out.close();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

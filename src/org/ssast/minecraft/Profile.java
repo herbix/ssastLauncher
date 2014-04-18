@@ -15,7 +15,7 @@ public class Profile {
 	public String pass = "";
 	public boolean savePass = false;
 	
-	public String authType = "minecraft";
+	public String authType = "yggdrasil";
 	
 	public String version = "";
 

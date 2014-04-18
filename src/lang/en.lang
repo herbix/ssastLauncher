@@ -11,8 +11,6 @@ msg.auth.minelogin.failed.3=No such user.
 msg.auth.minelogin.failed.4=Need verify.
 msg.auth.minelogin.failed.5=Bad password.
 msg.auth.skinme.donthavechar=You don't have this character.
-msg.auth.skinme.selectone1=You have more than one characters: 
-msg.auth.skinme.selectone2=. Use "character name:login name" format to login.
 
 msg.download.failed=Failed to download: 
 msg.download.start=Start downloading: 
@@ -95,6 +93,10 @@ ui.profile.remove=Remove
 ui.runpath.label=Work Directory
 ui.runpath.filechooser.title=Choose Work Directory
 
+ui.char.title=Character Select
+ui.char.ok=OK
+ui.char.cancel=Cancel
+
 ui.update.title=Updating...
 ui.launch=Launch
 ui.memory.label=Memory Size(MB):
@@ -109,5 +111,6 @@ ui.version.label=Version:
 ui.auth.type.label=Auth Type:
 ui.auth.type.ssast=SSAST Server
 ui.auth.type.offline=Offline
-ui.auth.type.minecraft=Official
+ui.auth.type.minecraft=Official(Legacy)
 ui.auth.type.minelogin=MineLogin
+ui.auth.type.yggdrasil=Official

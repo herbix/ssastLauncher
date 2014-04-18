@@ -2,8 +2,11 @@ package org.ssast.minecraft.auth;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import org.ssast.minecraft.CharSelectDialog;
 
 /**
  * This class defines a method to login minecraft. The classes in
@@ -204,6 +207,25 @@ public abstract class ServerAuth {
 	 */
 	public Map<String, Collection<String>> getUserProperties() {
 		return userProperties;
+	}
+	
+	/**
+	 * Show a dialog, where user can choose one of his/her characters
+	 * from a character list.
+	 * 
+	 * @param chars The character list
+	 * @return User selection, or <i>null</i> if user press cancel
+	 */
+	public Object selectFrom(List<Object> chars) {
+		CharSelectDialog dlg = new CharSelectDialog();
+		for(Object o : chars) {
+			dlg.chars.addItem(o);
+		}
+		dlg.setVisible(true);
+		if(dlg.selected) {
+			return dlg.chars.getSelectedItem();
+		}
+		return null;
 	}
 
 }

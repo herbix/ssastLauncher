@@ -12,6 +12,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.net.HttpURLConnection;
 
+import org.json.JSONObject;
+
 /**
  * This class contains methods to easy access http contents.
  * 
@@ -20,7 +22,12 @@ import java.net.HttpURLConnection;
  */
 public final class HttpFetcher {
 
-	private static HttpURLConnection connect(String url, String method, int downloaded, boolean doOutput)
+	private static HttpURLConnection connect(String url, String method, int downloaded, int len)
+			throws KeyManagementException, NoSuchAlgorithmException, IOException {
+		return connect(url, method, downloaded, len, "application/x-www-form-urlencoded");
+	}
+
+	private static HttpURLConnection connect(String url, String method, int downloaded, int len, String type)
 			throws KeyManagementException, NoSuchAlgorithmException,
 			IOException {
 		HttpURLConnection conn;
@@ -29,8 +36,9 @@ public final class HttpFetcher {
 		conn.setRequestMethod(method);
 		if(downloaded > 0)
 			conn.addRequestProperty("Range", downloaded + "-");
-		if(doOutput) {
-			conn.addRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		if(len > 0) {
+			conn.addRequestProperty("Content-Type", type + "; charset=utf-8");
+			conn.addRequestProperty("Content-Length", String.valueOf(len));
 			conn.setUseCaches(false);
 			conn.setDoInput(true);
 			conn.setDoOutput(true);
@@ -57,7 +65,7 @@ public final class HttpFetcher {
 			HttpURLConnection conn = null;
 			failed = false;
 			try {
-				conn = connect(url, "GET", downloaded, false);
+				conn = connect(url, "GET", downloaded, 0);
 				if(length == -1) {
 					String lenStr = conn.getHeaderField("Content-Length");
 					if(lenStr == null)
@@ -116,7 +124,7 @@ public final class HttpFetcher {
 			HttpURLConnection conn = null;
 			failed = false;
 			try {
-				conn = connect(url, "GET", downloaded, false);
+				conn = connect(url, "GET", downloaded, 0);
 				if(length == -1) {
 					String lenStr = conn.getHeaderField("Content-Length");
 					if(lenStr == null)
@@ -165,7 +173,17 @@ public final class HttpFetcher {
 	 * @return The content. If exception occurs, <i>null</i> will be returned.
 	 */
 	public static String fetchUsePostMethod(String url, Map<String, String> params) {
-		return fetchUsePostMethod(url, URLParam.mapToParamString(params));
+		return fetchUsePostMethod(url, URLParam.mapToParamString(params), "application/x-www-form-urlencoded");
+	}
+
+	/**
+	 * Get content from the url, using POST method.
+	 * @param url The url
+	 * @param json The JSON object to send
+	 * @return The content. If exception occurs, <i>null</i> will be returned.
+	 */
+	public static String fetchUsePostMethod(String url, JSONObject json) {
+		return fetchUsePostMethod(url, json.toString(), "application/json");
 	}
 
 	/**
@@ -175,6 +193,17 @@ public final class HttpFetcher {
 	 * @return The content. If exception occurs, <i>null</i> will be returned.
 	 */
 	public static String fetchUsePostMethod(String url, String params) {
+		return fetchUsePostMethod(url, params, "application/x-www-form-urlencoded");
+	}
+
+	/**
+	 * Get content from the url, using POST method.
+	 * @param url The url
+	 * @param params The string contains post params
+	 * @param type The param mime type
+	 * @return The content. If exception occurs, <i>null</i> will be returned.
+	 */
+	public static String fetchUsePostMethod(String url, String params, String type) {
 		byte[] buffer = new byte[4096];
 		ByteArrayBuilder ab = new ByteArrayBuilder();
 		
@@ -186,9 +215,11 @@ public final class HttpFetcher {
 			HttpURLConnection conn = null;
 			failed = false;
 			try {
-				conn = connect(url, "POST", downloaded, true);
+				byte[] toSend = params.getBytes("UTF-8");
+				conn = connect(url, "POST", downloaded, toSend.length, type);
+				
 				DataOutputStream os = new DataOutputStream(conn.getOutputStream());
-				os.writeBytes(params);
+				os.write(toSend);
 				os.flush();
 				os.close();
 

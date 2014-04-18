@@ -1,6 +1,8 @@
 package org.ssast.minecraft.auth;
 
 import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.ssast.minecraft.util.HttpFetcher;
 import org.ssast.minecraft.util.Lang;
@@ -72,19 +74,15 @@ public class SkinMeServerAuth extends ServerAuth {
 			} else {
 				
 				if(playerName == null) {
-					String chars = "";
+					List<Object> chars = new ArrayList<Object>();
 					for(int i=0; i<split.length; i++) {
 						String[] tmpSplit = split[i].split(",");
 						if(tmpSplit.length > 1) {
-							if(i != 0)
-								chars += "£¬";
-							chars += tmpSplit[1];
+							chars.add(tmpSplit[1]);
 						}
 					}
-					System.out.println(Lang.getString("msg.auth.skinme.selectone1") + chars + Lang.getString("msg.auth.skinme.selectone2"));
 					
-					callback.authDone(this, false);
-					return;
+					playerName = (String)selectFrom(chars);
 				}
 				
 				boolean find = false;
@@ -96,11 +94,13 @@ public class SkinMeServerAuth extends ServerAuth {
 						break;
 					}
 				}
+
 				if(!find) {
 					System.out.println(Lang.getString("msg.auth.skinme.donthavechar"));
 					callback.authDone(this, false);
 					return;
 				}
+
 				if(split.length < 1) {
 					callback.authDone(this, false);
 				} else {

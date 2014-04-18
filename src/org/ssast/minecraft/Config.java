@@ -56,6 +56,7 @@ public class Config {
 	public static String gamePath = Util.getWorkingDirectory().getPath();
 	public static long lastUpdate = Long.MIN_VALUE;
 	public static long dontUpdateUntil = Long.MIN_VALUE;
+	public static boolean showDebugInfo = false;
 
 	public static void saveConfig() {
 		Properties p = new Properties();
@@ -73,6 +74,7 @@ public class Config {
 		}
 		p.setProperty("profiles", profileList);
 		p.setProperty("current-profile", currentProfile.profileName);
+		p.setProperty("show-debug", String.valueOf(showDebugInfo));
 		
 		try {
 			FileOutputStream out = new FileOutputStream(CONFIG_FILE);
@@ -107,7 +109,6 @@ public class Config {
 				memory = Integer.valueOf(p.getProperty("memory", "1024"));
 			} catch (Exception e) {	}
 			gamePath = p.getProperty("game-path", Util.getWorkingDirectory().getPath());
-			gamePath = new File(gamePath).getAbsolutePath();
 			try {
 				lastUpdate = Long.valueOf(p.getProperty("last-update", String.valueOf(Long.MIN_VALUE)));
 			} catch (Exception e) {	}
@@ -127,6 +128,10 @@ public class Config {
 			
 			String current = p.getProperty("current-profile", "(Default)");
 			currentProfile = profiles.get(current);
+
+			try {
+				showDebugInfo = Boolean.valueOf(p.getProperty("show-debug", "false"));
+			} catch (Exception e) {	}
 			
 			in.close();
 		} catch (IOException e) {
