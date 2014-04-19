@@ -62,12 +62,12 @@ public class SSASTServerAuth extends ServerAuth {
 		{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
 	private static String getBase16Str(byte[] digest) {
-		String result = "";
+		StringBuilder result = new StringBuilder();
 		for(int i=0; i<16; i++) {
-			result += digits[(digest[i] & 0xff) >>> 4];
-			result += digits[digest[i] & 0xf];
+			result.append(digits[(digest[i] & 0xff) >>> 4]);
+			result.append(digits[digest[i] & 0xf]);
 		}
-		return result;
+		return result.toString();
 	}
 
 	public static String getAuthTypeName() {

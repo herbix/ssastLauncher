@@ -6,6 +6,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.ssast.minecraft.Config;
+import org.ssast.minecraft.util.EasyFileAccess;
 import org.ssast.minecraft.util.OS;
 
 public class Library {
@@ -103,9 +104,26 @@ public class Library {
 	public List<String> getExtractExclude() {
 		return extractExclude;
 	}
+
+	public String getShaUrl() {
+		return getFullUrl() + ".sha1";
+	}
+
+	public String getTempShaPath() {
+		return getTempFilePath() + ".sha";
+	}
+
+	public String getRealShaPath() {
+		return getRealFilePath() + ".sha";
+	}
+	
+	public boolean downloaded() {
+		return EasyFileAccess.doSha1Checksum(getRealShaPath(), getRealFilePath());
+	}
 	
 	@Override
 	public boolean equals(Object o) {
 		return (o instanceof Library) ? ((Library)o).name.equals(name) : false;
 	}
+	
 }

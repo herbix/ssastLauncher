@@ -1,28 +1,31 @@
 package org.ssast.minecraft.util;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
 
 public class EasyFileAccess {
 	
 	public static String loadFile(String path) {
 
-		StringBuilder sb = new StringBuilder();
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		
-		BufferedReader in = null;
+		InputStream in = null;
 	
 		try {
-			in = new BufferedReader(new FileReader(path));
-			String line;
-			while((line = in.readLine()) != null) {
-				sb.append(line);
-				sb.append('\n');
+			in = new FileInputStream(path);
+			int n;
+			byte[] buffer = new byte[65536];
+			while((n = in.read(buffer)) >= 0) {
+				out.write(buffer, 0, n);
 			}
 		} catch(Exception e) {
 			return null;
@@ -34,7 +37,7 @@ public class EasyFileAccess {
 			}
 		}
 		
-		return sb.toString();
+		return new String(out.toByteArray());
 	}
 	
 	public static boolean saveFile(String path, String content) {
@@ -86,5 +89,42 @@ public class EasyFileAccess {
 			return false;
 		}
 		return true;
+	}
+
+	public static String getDigest(File file, String algorithm, int hashLength) {
+		DigestInputStream stream = null;
+		try {
+			stream = new DigestInputStream(new FileInputStream(file),
+					MessageDigest.getInstance(algorithm));
+			byte[] buffer = new byte[65536];
+			int read;
+			do {
+				read = stream.read(buffer);
+			} while (read > 0);
+		} catch (Exception ignored) {
+			return null;
+		} finally {
+			if (stream != null) {
+				try {
+					stream.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+
+		return String.format("%1$0" + hashLength + "x", new BigInteger(1, stream.getMessageDigest().digest()));
+	}
+	
+	public static boolean doSha1Checksum(String shaFilePath, String checkedFilePath) {
+		File checkedFile = new File(checkedFilePath);
+		if(!checkedFile.isFile()) {
+			return false;
+		}
+		String checksum = loadFile(shaFilePath);
+		if(checksum == null) {
+			return false;
+		}
+		String checksum2 = getDigest(checkedFile, "SHA-1", 40);
+		return checksum.equalsIgnoreCase(checksum2);
 	}
 }

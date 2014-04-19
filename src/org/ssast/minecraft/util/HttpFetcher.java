@@ -1,14 +1,12 @@
 package org.ssast.minecraft.util;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.net.HttpURLConnection;
 
@@ -22,20 +20,15 @@ import org.json.JSONObject;
  */
 public final class HttpFetcher {
 
-	private static HttpURLConnection connect(String url, String method, int downloaded, int len)
-			throws KeyManagementException, NoSuchAlgorithmException, IOException {
-		return connect(url, method, downloaded, len, "application/x-www-form-urlencoded");
-	}
-
-	private static HttpURLConnection connect(String url, String method, int downloaded, int len, String type)
-			throws KeyManagementException, NoSuchAlgorithmException,
-			IOException {
+	private static HttpURLConnection createConnection(String url, String method, int downloaded, int len, String type)
+			throws 	IOException {
 		HttpURLConnection conn;
 		URL console = new URL(url);
 		conn = (HttpURLConnection) console.openConnection();
 		conn.setRequestMethod(method);
-		if(downloaded > 0)
+		if(downloaded > 0) {
 			conn.addRequestProperty("Range", downloaded + "-");
+		}
 		if(len > 0) {
 			conn.addRequestProperty("Content-Type", type + "; charset=utf-8");
 			conn.addRequestProperty("Content-Length", String.valueOf(len));
@@ -43,8 +36,32 @@ public final class HttpFetcher {
 			conn.setDoInput(true);
 			conn.setDoOutput(true);
 		}
-		conn.connect();
 		return conn;
+	}
+	
+	private static void pipeStream(InputStream in, OutputStream out) throws IOException {
+		pipeStream(in, out, 0, -1);
+	}
+	
+	private static int pipeStream(InputStream in, OutputStream out, int downloaded, int length) throws IOException {
+		byte[] buffer = new byte[4096];
+		int count;
+
+		while ((count = in.read(buffer)) >= 0) {
+			downloaded += count;
+			if (count > 0) {
+				out.write(buffer, 0, count);
+				if(length > 0) {
+					int n = (downloaded * 80 / length) - (downloaded - count) * 80 / length;
+					for(int i=0; i<n; i++)
+						System.out.print(".");
+				}
+			}
+		}
+		if(length > 0) {
+			System.out.print("\n");
+		}
+		return downloaded;
 	}
 
 	/**
@@ -53,78 +70,56 @@ public final class HttpFetcher {
 	 * @return The content. If exception occurs, <i>null</i> will be returned.
 	 */
 	public static String fetch(String url) {
-		byte[] buffer = new byte[4096];
-		ByteArrayBuilder ab = new ByteArrayBuilder();
-		
-		boolean failed;
-		int tryCount = 0;
-		int downloaded = 0;
-		int length = -1;
-		do {
-			tryCount++;
-			HttpURLConnection conn = null;
-			failed = false;
-			try {
-				conn = connect(url, "GET", downloaded, 0);
-				if(length == -1) {
-					String lenStr = conn.getHeaderField("Content-Length");
-					if(lenStr == null)
-						length = -2;
-					else
-						length = Integer.valueOf(lenStr);
-				}
-				InputStream is = conn.getInputStream();
-				DataInputStream indata = new DataInputStream(is);
-				int count = 1;
-				while (count >= 0) {
-					count = indata.read(buffer);
-					downloaded += count;
-					if (count > 0) {
-						ab.append(buffer, 0, count);
-						if(length > 0) {
-							int n = (downloaded * 80 / length) - (downloaded - count) * 80 / length;
-							for(int i=0; i<n; i++)
-								System.out.print(".");
-						}
-					}
-				}
-				System.out.print("\n");
-				indata.close();
-			} catch (Exception e) {
-				failed = true;
-			} finally {
-				if (conn != null)
-					conn.disconnect();
-			}
-		} while (failed && tryCount < 10);
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+		boolean failed = fetchToStream(url, out);
 
 		if(failed)
 			return null;
-		return new String(ab.toArray());
+		return new String(out.toByteArray());
 	}
 
 	/**
 	 * Get content from the url and save to a local file.
 	 * Be sure <b>param file</b> is a file that doesn't exist.
 	 * @param url The url
-	 * @param file Local filename to save.
+	 * @param file Local filename to save
 	 * @return Whether network access is available.
 	 * @throws IOException if the file can't be created
 	 */
 	public static boolean fetchAndSave(String url, String file) throws IOException {
-		byte[] buffer = new byte[4096];
+		OutputStream out = new FileOutputStream(file);
+		
+		boolean failed = fetchToStream(url, out);
 
+		out.close();
+		
+		if(failed) {
+			new File(file).delete();
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * Get content from the url and output to a stream.
+	 * 
+	 * @param url The url
+	 * @param out Stream to output
+	 * @return Whether the operation succeed
+	 */
+	public static boolean fetchToStream(String url, OutputStream out) {
 		boolean failed;
 		int tryCount = 0;
 		int downloaded = 0;
 		int length = -1;
-		DataOutputStream fout = new DataOutputStream(new FileOutputStream(file));
 		do {
 			tryCount++;
 			HttpURLConnection conn = null;
 			failed = false;
 			try {
-				conn = connect(url, "GET", downloaded, 0);
+				conn = createConnection(url, "GET", downloaded, 0, "application/x-www-form-urlencoded");
+				conn.connect();
 				if(length == -1) {
 					String lenStr = conn.getHeaderField("Content-Length");
 					if(lenStr == null)
@@ -132,23 +127,9 @@ public final class HttpFetcher {
 					else
 						length = Integer.valueOf(lenStr);
 				}
-				InputStream is = conn.getInputStream();
-				DataInputStream indata = new DataInputStream(is);
-				int count = 1;
-				while (count >= 0) {
-					count = indata.read(buffer);
-					downloaded += count;
-					if (count > 0) {
-						fout.write(buffer, 0, count);
-						if(length > 0) {
-							int n = (downloaded * 80 / length) - (downloaded - count) * 80 / length;
-							for(int i=0; i<n; i++)
-								System.out.print(".");
-						}
-					}
-				}
-				System.out.print("\n");
-				indata.close();
+				InputStream in = conn.getInputStream();
+				pipeStream(in, out, downloaded, length);
+				in.close();
 			} catch (Exception e) {
 				failed = true;
 			} finally {
@@ -156,14 +137,8 @@ public final class HttpFetcher {
 					conn.disconnect();
 			}
 		} while (failed && tryCount < 10);
-
-		fout.close();
 		
-		if(failed) {
-			new File(file).delete();
-			return false;
-		}
-		return true;
+		return failed;
 	}
 	
 	/**
@@ -204,36 +179,27 @@ public final class HttpFetcher {
 	 * @return The content. If exception occurs, <i>null</i> will be returned.
 	 */
 	public static String fetchUsePostMethod(String url, String params, String type) {
-		byte[] buffer = new byte[4096];
-		ByteArrayBuilder ab = new ByteArrayBuilder();
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		
 		boolean failed;
 		int tryCount = 0;
-		int downloaded = 0;
 		do {
 			tryCount++;
 			HttpURLConnection conn = null;
 			failed = false;
 			try {
 				byte[] toSend = params.getBytes("UTF-8");
-				conn = connect(url, "POST", downloaded, toSend.length, type);
+				conn = createConnection(url, "POST", 0, toSend.length, type);
+				conn.connect();
 				
-				DataOutputStream os = new DataOutputStream(conn.getOutputStream());
+				OutputStream os = conn.getOutputStream();
 				os.write(toSend);
 				os.flush();
 				os.close();
 
-				InputStream is = conn.getInputStream();
-				DataInputStream indata = new DataInputStream(is);
-				int count = 1;
-				while (count >= 0) {
-					count = indata.read(buffer);
-					downloaded += count;
-					if (count > 0) {
-						ab.append(buffer, 0, count);
-					}
-				}
-				indata.close();
+				InputStream in = conn.getInputStream();
+				pipeStream(in, out);
+				in.close();
 			} catch (Exception e) {
 				failed = true;
 			} finally {
@@ -244,6 +210,6 @@ public final class HttpFetcher {
 
 		if(failed)
 			return null;
-		return new String(ab.toArray());
+		return new String(out.toByteArray());
 	}
 }

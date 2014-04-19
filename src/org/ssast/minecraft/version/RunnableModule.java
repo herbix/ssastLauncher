@@ -75,45 +75,69 @@ public class RunnableModule extends Module {
 
 			if(succeed) {
 				if(type.equals("json")) {
-					JSONObject json = new JSONObject(d.getDownloaded());
-					moduleInfo = new RunnableModuleInfo(json);
-
-					if(!moduleInfo.canRunInThisOS()) {
-						System.out.println(Lang.getString("msg.module.notallowed"));
-						System.out.println(Lang.getString("msg.module.reason") + moduleInfo.incompatibilityReason);
-						moduleDownloader.forceStop();
-						System.out.println(Lang.getString("msg.module.failed") + "[" + getName() + "]");
-						return;
-					}
-
-					new File(getModuleJsonPath()).getParentFile().mkdirs();
-					EasyFileAccess.saveFile(getModuleJsonPath(), d.getDownloaded());
-					
-					checkModuleAssets();
+					downloadDoneJson(d, succeed, queueEmpty);
 				} else if(type.equals("bin")) {
-					File file = new File(d.getSavedFile());
-					File fileReal;
-					
-					if(lib != null) {
-						fileReal = new File(lib.getRealFilePath());
-					} else {
-						fileReal = new File(getModuleJarPath());
-					}
-					
-					fileReal.delete();
-					file.renameTo(fileReal);
-					
-					if(lib != null && lib.needExtract()) {
-						extractLib(lib, fileReal);
-					}
-
-					if(queueEmpty) {
-						finishInstall();
-					}
+					downloadDoneBin(d, succeed, queueEmpty);
+				} else if(type.equals("sha")) {
+					downloadDoneSha(d, succeed, queueEmpty);
 				}
 			} else {
 				moduleDownloader.forceStop();
 				System.out.println(Lang.getString("msg.module.failed") + "[" + getName() + "]");
+			}
+		}
+		
+		public void downloadDoneJson(Downloadable d, boolean succeed, boolean queueEmpty) {
+			JSONObject json = new JSONObject(d.getDownloaded());
+			moduleInfo = new RunnableModuleInfo(json);
+
+			if(!moduleInfo.canRunInThisOS()) {
+				System.out.println(Lang.getString("msg.module.notallowed"));
+				System.out.println(Lang.getString("msg.module.reason") + moduleInfo.incompatibilityReason);
+				moduleDownloader.forceStop();
+				System.out.println(Lang.getString("msg.module.failed") + "[" + getName() + "]");
+				return;
+			}
+
+			new File(getModuleJsonPath()).getParentFile().mkdirs();
+			EasyFileAccess.saveFile(getModuleJsonPath(), d.getDownloaded());
+			
+			checkModuleAssets();
+		}
+		
+		public void downloadDoneBin(Downloadable d, boolean succeed, boolean queueEmpty) {
+			File file = new File(d.getSavedFile());
+			File fileReal;
+			
+			if(lib != null) {
+				fileReal = new File(lib.getRealFilePath());
+			} else {
+				fileReal = new File(getModuleJarPath());
+			}
+			
+			fileReal.delete();
+			file.renameTo(fileReal);
+			
+			if(lib != null && lib.needExtract()) {
+				extractLib(lib, fileReal);
+			}
+
+			if(queueEmpty) {
+				finishInstall();
+			}
+		}
+		
+		public void downloadDoneSha(Downloadable d, boolean succeed, boolean queueEmpty) {
+			File file = new File(d.getSavedFile());
+			File fileReal;
+			
+			fileReal = new File(lib.getRealShaPath());
+			
+			fileReal.delete();
+			file.renameTo(fileReal);
+
+			if(queueEmpty) {
+				finishInstall();
 			}
 		}
 	}
@@ -149,6 +173,7 @@ public class RunnableModule extends Module {
 
 			new File(getModuleJarTempPath()).getParentFile().mkdirs();
 			new File(getModuleJarPath()).getParentFile().mkdirs();
+
 			moduleDownloader.addDownload(
 				new Downloadable(getModuleJarUrl(), getModuleJarTempPath(),
 				new GameDownloadCallback("bin", null)));
@@ -160,10 +185,15 @@ public class RunnableModule extends Module {
 			if(!lib.needDownloadInOS())
 				continue;
 			
-			File realFile = new File(lib.getRealFilePath());
-			if(realFile.isFile()) {
+			if(lib.downloaded()) {
 				if(lib.needExtract()) {
-					extractLib(lib, realFile);
+					List<String> excludes = lib.getExtractExclude();
+					String extractBase = lib.getNativeExtractedPath() + "/";
+					File realFile = new File(lib.getRealFilePath());
+					if(!EasyZipAccess.checkHasAll(realFile.getPath(), 
+							extractBase, excludes, "")) {
+						extractLib(lib, realFile);
+					}
 				}
 				continue;
 			}
@@ -172,8 +202,12 @@ public class RunnableModule extends Module {
 			new File(lib.getRealFilePath()).getParentFile().mkdirs();
 
 			moduleDownloader.addDownload(
-					new Downloadable(lib.getFullUrl(), lib.getTempFilePath(),
-					new GameDownloadCallback("bin", lib)));
+				new Downloadable(lib.getShaUrl(), lib.getTempShaPath(),
+				new GameDownloadCallback("sha", lib)));
+
+			moduleDownloader.addDownload(
+				new Downloadable(lib.getFullUrl(), lib.getTempFilePath(),
+				new GameDownloadCallback("bin", lib)));
 			
 			addCount++;
 		}
@@ -203,7 +237,7 @@ public class RunnableModule extends Module {
 			}.start();
 		}
 	}
-	
+
 	class AssetDownloadCallback extends DownloadCallbackAdapter {
 		private String type;
 		private AssetItem asset;
@@ -366,7 +400,7 @@ public class RunnableModule extends Module {
 					String path = lib.getRealFilePath();
 					File realFile = new File(path);
 
-					if(!realFile.isFile()) {
+					if(!lib.downloaded()) {
 						installState = 0;
 						return false;
 					} else if(lib.needExtract()) {
@@ -559,7 +593,7 @@ public class RunnableModule extends Module {
 	private String getModuleAssetsIndexPath() {
 		return Config.gamePath + Config.MINECRAFT_INDEXES_PATH + "/" + getAssetsIndex() + ".json";
 	}
-	
+
 	private boolean tryLoadModuleInfo() {
 		if(moduleInfo != null)
 			return true;

@@ -1,10 +1,15 @@
 package org.ssast.minecraft.download;
 
+import java.io.IOException;
+
+import org.ssast.minecraft.util.HttpFetcher;
+import org.ssast.minecraft.util.Lang;
+
 public class Downloadable {
-	String url = null;
-	String saveFilePath = null;
-	DownloadCallback callback = null;
-	String downloaded = null;
+	private String url = null;
+	private String saveFilePath = null;
+	private DownloadCallback callback = null;
+	private String downloaded = null;
 	
 	public Downloadable(String url, String saveFilePath) {
 		this(url, saveFilePath, null);
@@ -30,5 +35,33 @@ public class Downloadable {
 	
 	public String getSavedFile() {
 		return saveFilePath;
+	}
+
+	public void download(Downloader downloader) {
+		if(url == null) {
+			return;
+		}
+		boolean succeed;
+		if(callback != null) {
+			callback.downloadStart(this);
+		}
+		System.out.println(Lang.getString("msg.download.start") + url);
+		if(saveFilePath == null) {
+			downloaded = HttpFetcher.fetch(url);
+			succeed = (downloaded != null);
+		} else {
+			try {
+				succeed = HttpFetcher.fetchAndSave(url, saveFilePath);
+			} catch (IOException e) {
+				succeed = false;
+			}
+		}
+		if(succeed)
+			System.out.println(Lang.getString("msg.download.succeeded") + url);
+		else
+			System.out.println(Lang.getString("msg.download.failed") + url);
+		if(callback != null) {
+			callback.downloadDone(this, succeed, downloader.queueEmpty());
+		}
 	}
 }
