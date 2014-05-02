@@ -1,12 +1,12 @@
 package org.ssast.minecraft.version;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.ssast.minecraft.Config;
+import org.ssast.minecraft.util.EasyFileAccess;
 import org.ssast.minecraft.util.OS;
 
 public class Library {
@@ -118,8 +118,7 @@ public class Library {
 	}
 	
 	public boolean downloaded() {
-		return new File(getRealFilePath()).isFile();
-		//return EasyFileAccess.doSha1Checksum(getRealShaPath(), getRealFilePath());
+		return EasyFileAccess.doSha1Checksum(getRealShaPath(), getRealFilePath());
 	}
 	
 	@Override

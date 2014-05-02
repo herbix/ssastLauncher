@@ -72,7 +72,6 @@ public class Updater {
 		return null;
 	}
 
-	
 	private boolean extractUpdater() throws Exception {
 		JarFile file = new JarFile(currentFile);
 		
@@ -135,18 +134,20 @@ public class Updater {
 			
 			if(!extractUpdater())
 				return;
-			
+
 			int selection = JOptionPane.showConfirmDialog(null, Lang.getString("msg.update.request"), "SSAST Launcher", JOptionPane.YES_NO_OPTION);
 			if(selection == JOptionPane.NO_OPTION) {
 				Config.dontUpdateUntil = new Date().getTime() + 7 * 24 * 60 * 60 * 1000;
 				return;
 			}
 			
+			UpdateDialog dialog = null;
+			
 			try {
 				URLConnection conn = new URL("http://minecraft.ssast.org/SSASTLauncher.jar").openConnection();
 				conn.setReadTimeout(500);
 				InputStream in = conn.getInputStream();
-				UpdateDialog dialog = new UpdateDialog();
+				dialog = new UpdateDialog();
 				dialog.setVisible(true);
 				
 				File tempFile = new File(new File(Config.TEMP_DIR), "SSASTLauncher.jar");
@@ -193,8 +194,11 @@ public class Updater {
 				System.exit(0);
 			
 			} catch (Exception e) {
-				JOptionPane.showConfirmDialog(null, Lang.getString("msg.update.exception1") + e.toString() + Lang.getString("msg.update.exception2"), "SSAST Launcher",
-						JOptionPane.OK_OPTION, JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, Lang.getString("msg.update.exception1") + e.toString() + Lang.getString("msg.update.exception2"), "SSAST Launcher",
+						JOptionPane.ERROR_MESSAGE);
+				if(dialog != null) {
+					dialog.setVisible(false);
+				}
 			}
 		
 		} catch (Exception e) {

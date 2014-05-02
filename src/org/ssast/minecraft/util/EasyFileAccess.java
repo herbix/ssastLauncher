@@ -122,7 +122,7 @@ public class EasyFileAccess {
 		}
 		String checksum = loadFile(shaFilePath);
 		if(checksum == null) {
-			return false;
+			return true;
 		}
 		String checksum2 = getDigest(checkedFile, "SHA-1", 40);
 		return checksum.equalsIgnoreCase(checksum2);
