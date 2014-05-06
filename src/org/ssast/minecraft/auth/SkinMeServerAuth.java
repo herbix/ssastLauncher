@@ -83,6 +83,11 @@ public class SkinMeServerAuth extends ServerAuth {
 					}
 					
 					playerName = (String)selectFrom(chars);
+					
+					if(playerName == null) {
+						callback.authDone(this, false);
+						return;
+					}
 				}
 				
 				boolean find = false;

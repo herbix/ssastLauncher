@@ -15,7 +15,6 @@ import java.util.regex.Pattern;
 import org.json.JSONObject;
 import org.ssast.minecraft.Config;
 import org.ssast.minecraft.auth.ServerAuth;
-import org.ssast.minecraft.util.HttpFetcher;
 import org.ssast.minecraft.util.Lang;
 import org.ssast.minecraft.util.OS;
 import org.ssast.minecraft.version.RunnableModule;
@@ -53,19 +52,13 @@ public class Runner {
 			}
 		}
 		
-		String requiredMod = tryDownloadRequiredMod(auth.getClass(), Config.currentProfile.version);
-		if(requiredMod == null) {
-			System.out.println(Lang.getString("msg.mod.required.error"));
-			return false;
-		}
-		
 		params.add(java);
 		
 		params.add("-Xmx" + Config.memory + "M");
 		params.add("-Xms" + Config.memory + "M");
 		
 		params.add("-cp");
-		String cp = requiredMod;
+		String cp = "";
 		if(!cp.equals(""))
 			cp += System.getProperty("path.separator");
 		cp += module.getClassPath(!cp.equals(""));
@@ -164,40 +157,5 @@ public class Runner {
 			e.printStackTrace();
 		}
 
-	}
-	
-	public static String tryDownloadRequiredMod(Class<? extends ServerAuth> auth, String version) {
-
-		try {
-			String name = (String)auth.getMethod("getRequiredModName", String.class).invoke(null, Config.currentProfile.version);
-			
-			if(name == null)
-				return "";
-			
-			String url = (String)auth.getMethod("getRequiredModUrl", String.class).invoke(null, Config.currentProfile.version);
-			
-			String modFileStr = "mods/required/" + (String)auth.getDeclaredMethod("getAlias").invoke(null) + "/" + name;
-			File modFile = new File(modFileStr);
-			
-			if(modFile.isFile()) {
-				return modFile.getAbsolutePath();
-			}
-			
-			System.out.println(Lang.getString("msg.download.start") + url);
-			
-			modFile.getParentFile().mkdirs();
-			
-			if(HttpFetcher.fetchAndSave(url, modFileStr)) {
-				System.out.println(Lang.getString("msg.download.succeeded") + url);
-				return modFile.getAbsolutePath();
-			}
-
-			System.out.println(Lang.getString("msg.download.failed") + url);
-			
-		} catch (Exception e) {
-			
-		}
-
-		return null;
 	}
 }

@@ -77,16 +77,4 @@ public class SSASTServerAuth extends ServerAuth {
 	public static String getAlias() {
 		return "ssast";
 	}
-
-	public static String getRequiredModUrl(String version) {
-		return "http://minecraft.ssast.org/SSAST_Client_" + version + ".zip";
-	}
-	
-	public static String getRequiredModName(String version) {
-		if(version.matches("[0-9]\\.[0-9]\\.[0-9]")) {
-			return "SSAST_Client_" + version + ".zip";
-		} else {
-			return null;
-		}
-	}
 }

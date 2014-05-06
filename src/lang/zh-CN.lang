@@ -56,7 +56,7 @@ msg.profile.exists=此配置已存在
 msg.profile.inputname=输入新配置的名称：
 
 msg.gamepath.error=无法使用.minecraft目录！
-msg.help=\u0020- 新版启动器\u000a - 支持mod注入\u000a - 支持不同版本minecraft运行\u000a - 支持需要json读取的版本\u000a如果有bug请联系fakechaos@sina.com
+msg.help=如果有bug请联系herbix@163.com
 msg.jrepath.error=无法启动java，请检查jre路径
 msg.zip.unzip=解压
 msg.comingsoon=暂未开放此功能

@@ -27,7 +27,7 @@ import org.ssast.minecraft.version.Version;
 
 public class Launcher {
 
-	private static final String helpWords = "SSAST Launcher V1.6.3\n" + Lang.getString("msg.help");
+	private static final String helpWords = "SSAST Launcher V1.6.4\n" + Lang.getString("msg.help");
 
 	private LauncherFrame frame = null;
 
@@ -74,7 +74,6 @@ public class Launcher {
 		new File(Config.gamePath + "/assets").mkdirs();
 		new File(Config.gamePath + "/libraries").mkdirs();
 		new File(Config.TEMP_DIR).mkdirs();
-		new File(Config.MOD_DIR).mkdirs();
 	}
 	
 	private void initGameComponentsList() {

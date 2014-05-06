@@ -51,7 +51,7 @@ msg.profile.cannotremovedefault=Cannot remove default profile.
 msg.profile.removeconfirm=Are you sure you want to remove this profile?
 
 msg.gamepath.error=Unable to use '.minecraft' directory.
-msg.help=\u0020- Compatible with new version minecraft.\n - Easy to inject mods.\n - Manage more than one version of minecraft.\n - Compatible with json type versions.\nBug reporting: fakechaos@sina.com.
+msg.help=Bug reporte: herbix@163.com.
 msg.jrepath.error=Unable to run java from specified jre path.
 msg.zip.unzip=Unzipping 
 msg.comingsoon=Cannot do this now.

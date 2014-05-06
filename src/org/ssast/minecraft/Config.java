@@ -44,7 +44,6 @@ public class Config {
 	public static final String MINECRAFT_VERSION_GAME_EXTRACT_FORMAT =
 		"/versions/%s/%s/";
 
-	public static final String MOD_DIR = "mods";
 	public static final String TEMP_DIR = new File(new File(System.getProperty("java.io.tmpdir")), "SSASTLauncher").getPath();
 
 	public static Profile currentProfile = null;

@@ -162,31 +162,6 @@ public abstract class ServerAuth {
 	public static String getAlias() {
 		return "N/A";
 	}
-	
-	/**
-	 * SSAST Launcher give you a chance to put your special mod into
-	 * minecraft game when using your auth method. This is the url
-	 * where you should download the mod.
-	 * 
-	 * @param version Specific version of minecraft game
-	 * @return Url from which you can download the mod
-	 */
-	public static String getRequiredModUrl(String version) {
-		return null;
-	}
-
-	/**
-	 * SSAST Launcher give you a chance to put your special mod into
-	 * minecraft game when using your auth method. This is the name
-	 * used when saved on disc. If you have different version, don't
-	 * use a same name.
-	 * 
-	 * @param version Specific version of minecraft game
-	 * @return Name saved on disc, for example 'SSAST_1.6.2.zip'
-	 */
-	public static String getRequiredModName(String version) {
-		return null;
-	}
 
 	/**
 	 * @param userType User type to be set
