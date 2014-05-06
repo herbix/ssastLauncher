@@ -183,8 +183,6 @@ public class Updater {
 		
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			Config.currentETag = eTag;
 		}
 	}
 }
