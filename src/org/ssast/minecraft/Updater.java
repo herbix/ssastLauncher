@@ -105,7 +105,7 @@ public class Updater {
 			if(!getRemoteFileInfo())
 				return;
 
-			if(eTag.equals(""))
+			if(Config.currentETag.equals(""))
 				if(checkSizeEqual())
 					return;
 
