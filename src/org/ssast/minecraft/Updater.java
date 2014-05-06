@@ -12,40 +12,37 @@ import java.util.zip.ZipEntry;
 
 import javax.swing.JOptionPane;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.ssast.minecraft.util.HttpFetcher;
 import org.ssast.minecraft.util.Lang;
 import org.ssast.minecraft.util.OS;
 
 public class Updater {
-	
-	private String fileList = "";
-	private boolean fileListGot = false;
+
+	private boolean filePropertyGot = false;
 
 	private String currentFile;
 	
-	private Object[] lock = new Object[0];
+	private byte[] lock = new byte[0];
 	
-	private long lastUpdate;
+	private String eTag = "";
+	private int size = 0;
 	
-	private boolean getLastUpdate() throws Exception {
-		
-		File f = new File(currentFile);
-
-		if(!f.exists())
-			return false;
-		
-		lastUpdate = f.lastModified();
-		return true;
-	}
-	
-	private boolean getRemoteFileList() throws Exception {
+	private boolean getRemoteFileInfo() throws Exception {
 		Thread downloadFile = new Thread() {
 			public void run() {
-				fileList = HttpFetcher.fetch("http://minecraft.ssast.org/filelist.php");
+				URLConnection conn;
+				try {
+					conn = new URL("https://raw.githubusercontent.com/herbix/ssastLauncher/master/build/SSASTLauncher.jar").openConnection();
+					conn.setReadTimeout(500);
+					conn.connect();
+					size = conn.getContentLength();
+					eTag = conn.getHeaderField("ETag");
+					eTag = eTag.substring(1, eTag.length()-1);
+					conn.getInputStream().close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				synchronized (lock) {
-					fileListGot = true;
+					filePropertyGot = true;
 					lock.notify();
 				}
 			}
@@ -53,23 +50,14 @@ public class Updater {
 		
 		synchronized (lock) {
 			downloadFile.start();
-			lock.wait(500);
+			lock.wait();
 		}
 		
-		return fileListGot;
+		return filePropertyGot;
 	}
-	
-	private JSONObject getLauncherJarInfo() {
-		JSONObject listObj = new JSONObject(fileList);
-		JSONArray listArr = listObj.getJSONArray("list");
-		
-		for(int i=0; i<listArr.length(); i++) {
-			JSONObject elem = listArr.getJSONObject(i);
-			if(!elem.getString("name").equals("SSASTLauncher.jar"))
-				continue;
-			return elem;
-		}
-		return null;
+
+	private boolean checkSizeEqual() {
+		return size == new File(currentFile).getTotalSpace();
 	}
 
 	private boolean extractUpdater() throws Exception {
@@ -101,7 +89,7 @@ public class Updater {
 			return;
 		}
 		
-		lastUpdate = Config.lastUpdate;
+		eTag = Config.currentETag;
 
 		try {
 			currentFile = URLDecoder.decode(
@@ -114,22 +102,14 @@ public class Updater {
 			currentFile = currentFile.substring(4 + 5);
 			currentFile = currentFile.substring(0, currentFile.lastIndexOf('!'));
 
-			if(lastUpdate == Long.MIN_VALUE)
-				if(!getLastUpdate())
+			if(!getRemoteFileInfo())
+				return;
+
+			if(eTag.equals(""))
+				if(checkSizeEqual())
 					return;
 
-			if(!getRemoteFileList())
-				return;
-			
-			long remoteTime = 0;
-			long size = 0;
-			
-			JSONObject elem = getLauncherJarInfo();
-
-			remoteTime = elem.getLong("time");
-			size = elem.getLong("size");
-
-			if(remoteTime - lastUpdate < 1000)
+			if(eTag.equals(Config.currentETag))
 				return;
 			
 			if(!extractUpdater())
@@ -144,7 +124,7 @@ public class Updater {
 			UpdateDialog dialog = null;
 			
 			try {
-				URLConnection conn = new URL("http://minecraft.ssast.org/SSASTLauncher.jar").openConnection();
+				URLConnection conn = new URL("https://raw.githubusercontent.com/herbix/ssastLauncher/master/build/SSASTLauncher.jar").openConnection();
 				conn.setReadTimeout(500);
 				InputStream in = conn.getInputStream();
 				dialog = new UpdateDialog();
@@ -171,7 +151,6 @@ public class Updater {
 				
 				in.close();
 				out.close();
-				tempFile.setLastModified(remoteTime);
 				
 				dialog.setVisible(false);
 				
@@ -183,7 +162,7 @@ public class Updater {
 					}
 				}
 				
-				Config.lastUpdate = remoteTime;
+				Config.currentETag = eTag;
 				Config.dontUpdateUntil = Long.MIN_VALUE;
 				Config.saveConfig();
 				
@@ -204,7 +183,7 @@ public class Updater {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			Config.lastUpdate = lastUpdate;
+			Config.currentETag = eTag;
 		}
 	}
 }
