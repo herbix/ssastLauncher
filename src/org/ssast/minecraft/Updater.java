@@ -118,6 +118,7 @@ public class Updater {
 			int selection = JOptionPane.showConfirmDialog(null, Lang.getString("msg.update.request"), "SSAST Launcher", JOptionPane.YES_NO_OPTION);
 			if(selection == JOptionPane.NO_OPTION) {
 				Config.dontUpdateUntil = new Date().getTime() + 7 * 24 * 60 * 60 * 1000;
+				eTag = Config.currentETag;
 				return;
 			}
 			
