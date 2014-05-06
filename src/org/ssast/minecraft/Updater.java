@@ -57,7 +57,7 @@ public class Updater {
 	}
 
 	private boolean checkSizeEqual() {
-		return size == new File(currentFile).getTotalSpace();
+		return size == new File(currentFile).length();
 	}
 
 	private boolean extractUpdater() throws Exception {
