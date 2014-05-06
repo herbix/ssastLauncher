@@ -27,10 +27,17 @@ public class ModuleManager {
 		model.setRowCount(0);
 
 		moduleFromListItem.clear();
-		for(int i=0; i<modules.length; i++) {
+		for(int i=0, j=0; i<modules.length; i++) {
 			Module m = modules[i];
+			if(!Config.showOld && m.getType().startsWith("old")) {
+				continue;
+			}
+			if(!Config.showSnapshot && m.getType().startsWith("snapshot")) {
+				continue;
+			}
 			model.addRow(new String[]{ m.getName(), m.getType(), m.getState() });
-			moduleFromListItem.put(i, m);
+			moduleFromListItem.put(j, m);
+			j++;
 		}
 	}
 

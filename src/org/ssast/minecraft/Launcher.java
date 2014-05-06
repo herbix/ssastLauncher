@@ -10,7 +10,6 @@ import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-
 import org.ssast.minecraft.auth.AuthDoneCallback;
 import org.ssast.minecraft.auth.AuthType;
 import org.ssast.minecraft.auth.ServerAuth;
@@ -183,6 +182,9 @@ public class Launcher {
 				Config.currentProfile.updateToFrame(frame);
 			}
 		});
+		
+		frame.showOld.addActionListener(new ShowInModuleListListener());
+		frame.showSnapshot.addActionListener(new ShowInModuleListListener());
 	}
 
 	class ModuleActionListener implements ActionListener {
@@ -262,6 +264,15 @@ public class Launcher {
 					});
 				}
 			}.start();
+		}
+	}
+	
+	class ShowInModuleListListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			Config.showOld = frame.showOld.isSelected();
+			Config.showSnapshot = frame.showSnapshot.isSelected();
+
+			ModuleManager.showModules(frame.modulesModel);
 		}
 	}
 

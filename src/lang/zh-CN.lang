@@ -83,6 +83,8 @@ ui.module.label=版本：
 ui.module.notinstalled=
 ui.module.uninstall=卸载组件
 ui.module.notfinished=未完成安装
+ui.module.old=显示早期版本
+ui.module.snapshot=显示快照版本
 
 ui.table.name=名称
 ui.table.state=状态

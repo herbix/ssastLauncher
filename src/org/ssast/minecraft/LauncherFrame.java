@@ -53,34 +53,43 @@ public class LauncherFrame extends JFrame {
 	private static final long serialVersionUID = -1923022699772187651L;
 
 	JPanel base = new JPanel();
+
+	JSeparator hseparator = new JSeparator();
+	JSeparator hseparator2 = new JSeparator();
+	JSeparator vseparator = new JSeparator();
+
 	JTextArea console = new JTextArea();
 	JScrollPane consoleOuter = new JScrollPane(console);
+
 	JLabel modulesLabel = new JLabel(Lang.getString("ui.module.label"));
 	DefaultTableModel modulesModel = new UneditableTableModel();
 	JTable modules = new JTable(modulesModel);
 	JScrollPane modulesOuter = new JScrollPane(modules);
-	JSeparator hseparator = new JSeparator();
-	JSeparator hseparator2 = new JSeparator();
-	JSeparator vseparator = new JSeparator();
 	JButton installModules = new JButton(Lang.getString("ui.module.install"));
 	JButton uninstallModules = new JButton(Lang.getString("ui.module.uninstall"));
+	JCheckBox showOld = new JCheckBox(Lang.getString("ui.module.old"));
+	JCheckBox showSnapshot = new JCheckBox(Lang.getString("ui.module.snapshot"));
+
 	JLabel userLabel = new JLabel(Lang.getString("ui.username.label"));
 	JTextField user = new JTextField();
 	JLabel passLabel = new JLabel(Lang.getString("ui.password.label"));
 	JTextField pass = new JPasswordField();
-	JButton launch = new JButton(Lang.getString("ui.launch"));
 	JCheckBox savePass = new JCheckBox(Lang.getString("ui.savepassword"));
 	JLabel authTypeLabel = new JLabel(Lang.getString("ui.auth.type.label"));
 	JComboBox authType = new JComboBox();
 	JLabel gameVersionLabel = new JLabel(Lang.getString("ui.version.label"));
 	JComboBox gameVersion = new JComboBox();
+	JButton launch = new JButton(Lang.getString("ui.launch"));
+
 	JLabel profilesLabel = new JLabel(Lang.getString("ui.profile.label"));
 	JComboBox profiles = new JComboBox();
 	JButton addProfile = new JButton(Lang.getString("ui.profile.add"));
 	JButton removeProfile = new JButton(Lang.getString("ui.profile.remove"));
+
 	JLabel runPathLabel = new JLabel(Lang.getString("ui.runpath.label"));
 	JTextField runPath = new JTextField();
 	JButton runPathSearch = new JButton("...");
+
 	ButtonGroup runningMode = new ButtonGroup();
 	JRadioButton runningMode32 = new JRadioButton(Lang.getString("ui.mode.d32"), false);
 	JRadioButton runningMode64 = new JRadioButton(Lang.getString("ui.mode.d64"), false);
@@ -175,6 +184,14 @@ public class LauncherFrame extends JFrame {
 		base.add(uninstallModules);
 		uninstallModules.setLocation(100, 225);
 		uninstallModules.setSize(90, 30);
+		
+		base.add(showOld);
+		showOld.setLocation(195, 227);
+		showOld.setSize(100, 25);
+
+		base.add(showSnapshot);
+		showSnapshot.setLocation(295, 227);
+		showSnapshot.setSize(100, 25);
 		
 		base.add(userLabel);
 		userLabel.setLocation(405, 68);

@@ -78,6 +78,8 @@ ui.module.label=Versions:
 ui.module.notinstalled=
 ui.module.uninstall=Uninstall
 ui.module.notfinished=Half Installed
+ui.module.old=Old Versions
+ui.module.snapshot=Snapshots
 
 ui.table.name=Name
 ui.table.state=State
