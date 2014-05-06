@@ -106,8 +106,10 @@ public class Updater {
 				return;
 
 			if(Config.currentETag.equals(""))
-				if(checkSizeEqual())
+				if(checkSizeEqual()) {
+					Config.currentETag = eTag;
 					return;
+				}
 
 			if(eTag.equals(Config.currentETag))
 				return;
