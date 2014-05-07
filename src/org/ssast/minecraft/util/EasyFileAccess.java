@@ -84,6 +84,9 @@ public class EasyFileAccess {
 			while((len = in.read(buffer)) >= 0) {
 				out.write(buffer, 0, len);
 			}
+			
+			in.close();
+			out.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
