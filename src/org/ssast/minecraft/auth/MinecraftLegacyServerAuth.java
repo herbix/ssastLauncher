@@ -5,11 +5,11 @@ import java.util.HashMap;
 import org.ssast.minecraft.util.HttpFetcher;
 import org.ssast.minecraft.util.Lang;
 
-public class MinecraftServerAuth extends ServerAuth {
+public class MinecraftLegacyServerAuth extends ServerAuth {
 	
 	private static final int VERSION = 14;
 
-	public MinecraftServerAuth(String name, String pass) {
+	public MinecraftLegacyServerAuth(String name, String pass) {
 		super(name, pass);
 	}
 

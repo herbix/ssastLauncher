@@ -10,9 +10,9 @@ import org.json.JSONObject;
 import org.ssast.minecraft.util.HttpFetcher;
 import org.ssast.minecraft.util.Lang;
 
-public class MinecraftYggdrasilAuth extends ServerAuth {
+public class MinecraftYggdrasilServerAuth extends ServerAuth {
 
-	public MinecraftYggdrasilAuth(String name, String pass) {
+	public MinecraftYggdrasilServerAuth(String name, String pass) {
 		super(name, pass);
 	}
 
