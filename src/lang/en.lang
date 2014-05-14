@@ -58,6 +58,7 @@ msg.comingsoon=Cannot do this now.
 msg.assets.cannotload=Cannot load assets files.
 msg.run.unknownparam1=There is no param "
 msg.run.unknownparam2=".
+msg.twitch.inputname=Please input your player name:
 
 ui.crash.default=Unable to find minecraft crash report file. This is standard output of minecraft:\n
 ui.crash.title=Minecraft Crashed!
@@ -116,3 +117,4 @@ ui.auth.type.offline=Offline
 ui.auth.type.minecraft=Official(Legacy)
 ui.auth.type.minelogin=MineLogin
 ui.auth.type.yggdrasil=Official
+ui.auth.type.twitch=Twitch
