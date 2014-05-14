@@ -10,6 +10,7 @@ import org.ssast.minecraft.util.EasyFileAccess;
 import org.ssast.minecraft.util.OS;
 
 public class Library {
+
 	private String name;
 	private boolean extract;
 	private List<String> extractExclude;
@@ -17,6 +18,11 @@ public class Library {
 	private List<Rule> rules;
 	private String key;
 	private String url;
+	private String arch = "32";
+	
+	private Library() {
+		
+	}
 
 	public Library(JSONObject json) {
 		name = json.getString("name");
@@ -56,7 +62,6 @@ public class Library {
 
 		if(nativesMap != null) {
 			String osName = OS.getCurrentPlatform().getName();
-			String arch = System.getProperty("os.arch").equals("x86") ? "32" : "64";
 			result += "-" + nativesMap.getString(osName).replaceAll("\\$\\{arch\\}", arch);
 		}
 
@@ -79,15 +84,7 @@ public class Library {
 	public String getRealFilePath() {
 		return Config.gamePath + "/libraries/" + getKey();
 	}
-	
-	public String getNativeExtractedPath() {
-		if(extract) {
-			String key = getRealFilePath();
-			return key.substring(0, key.length() - 4);
-		}
-		return null;
-	}
-	
+
 	public String getExtractTempPath() {
 		String key = getTempFilePath();
 		return key.substring(0, key.length() - 4);
@@ -124,6 +121,34 @@ public class Library {
 	@Override
 	public boolean equals(Object o) {
 		return (o instanceof Library) ? ((Library)o).name.equals(name) : false;
+	}
+	
+	public boolean have64BitVersion() {
+		if(!needDownloadInOS()) {
+			return false;
+		}
+		if(nativesMap != null) {
+			String osName = OS.getCurrentPlatform().getName();
+			return nativesMap.getString(osName).contains("${arch}");
+		}
+		return false;
+	}
+
+	public Library clone64Version() {
+		Library result = new Library();
+		result.name = name;
+		result.extract = extract;
+		result.extractExclude = extractExclude;
+		result.nativesMap = nativesMap;
+		result.rules = rules;
+		result.key = key;
+		result.url = url;
+		result.arch = "64";
+		return result;
+	}
+
+	public boolean isCompatibleForArch(String arch2) {
+		return !have64BitVersion() || arch.equals(arch2);
 	}
 	
 }

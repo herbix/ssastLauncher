@@ -43,6 +43,8 @@ public class Config {
 		"/versions/%s/%s_temp/";
 	public static final String MINECRAFT_VERSION_GAME_EXTRACT_FORMAT =
 		"/versions/%s/%s/";
+	public static final String MINECRAFT_VERSION_NATIVE_PATH_FORMAT = 
+		"/versions/%s/%s-natives";
 
 	public static final String TEMP_DIR = new File(new File(System.getProperty("java.io.tmpdir")), "SSASTLauncher").getPath();
 

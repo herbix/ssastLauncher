@@ -2,7 +2,6 @@ package org.ssast.minecraft.version;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.json.JSONObject;
 import org.ssast.minecraft.Config;
@@ -117,10 +116,6 @@ public class RunnableModule extends Module {
 			
 			fileReal.delete();
 			file.renameTo(fileReal);
-			
-			if(lib != null && lib.needExtract()) {
-				extractLib(lib, fileReal);
-			}
 
 			if(queueEmpty) {
 				finishInstall();
@@ -142,11 +137,11 @@ public class RunnableModule extends Module {
 		}
 	}
 
-	private void extractLib(Library lib, File fileReal) {
+	private void extractLib(Library lib, File fileReal, String toWhere) {
 		System.out.println(Lang.getString("msg.zip.unzip") + lib.getKey());
 		
 		List<String> excludes = lib.getExtractExclude();
-		String extractBase = lib.getNativeExtractedPath() + "/";
+		String extractBase = toWhere;
 		new File(extractBase).mkdirs();
 
 		EasyZipAccess.extractZip(fileReal.getPath(), 
@@ -186,15 +181,6 @@ public class RunnableModule extends Module {
 				continue;
 			
 			if(lib.downloaded()) {
-				if(lib.needExtract()) {
-					List<String> excludes = lib.getExtractExclude();
-					String extractBase = lib.getNativeExtractedPath() + "/";
-					File realFile = new File(lib.getRealFilePath());
-					if(!EasyZipAccess.checkHasAll(realFile.getPath(), 
-							extractBase, excludes, "")) {
-						extractLib(lib, realFile);
-					}
-				}
 				continue;
 			}
 
@@ -282,15 +268,6 @@ public class RunnableModule extends Module {
 	}
 	
 	private void finishInstall() {
-
-		if(!new File(getModuleJarRunPath()).isFile()) {
-			EasyZipAccess.extractZip(getModuleJarPath(), 
-				getModuleJarExtractTempPath(), 
-				getModuleJarExtractPath(), Arrays.asList("META-INF/"), "run");
-			EasyZipAccess.generateJar(getModuleJarRunPath(),
-				getModuleJarExtractPath(), "run");
-		}
-
 		System.out.println(Lang.getString("msg.module.succeeded") + "[" + getName() + "]");
 		installState = 1;
 		if(installCallback != null)
@@ -348,12 +325,6 @@ public class RunnableModule extends Module {
 					System.out.println(Lang.getString("msg.module.delete") + libFile.getPath());
 					libFile.delete();
 					
-					if(l.needExtract()) {
-						File libExtract = new File(l.getNativeExtractedPath());
-						System.out.println(Lang.getString("msg.module.delete") + libExtract.getPath());
-						EasyFileAccess.deleteFileForce(libExtract);
-					}
-					
 					do {
 						libFile = libFile.getParentFile();
 					} while(!libFile.getName().equals("libraries") && libFile.delete());
@@ -375,8 +346,7 @@ public class RunnableModule extends Module {
 
 		if(installState == -1) {
 
-			if(!new File(getModuleJarPath()).isFile() || 
-					!new File(getModuleJarRunPath()).isFile()) {
+			if(!new File(getModuleJarPath()).isFile()) {
 				installState = 0;
 				return false;
 			}
@@ -397,20 +367,9 @@ public class RunnableModule extends Module {
 					if(!lib.needDownloadInOS())
 						continue;
 
-					String path = lib.getRealFilePath();
-					File realFile = new File(path);
-
 					if(!lib.downloaded()) {
 						installState = 0;
 						return false;
-					} else if(lib.needExtract()) {
-						List<String> excludes = lib.getExtractExclude();
-						String extractBase = lib.getNativeExtractedPath() + "/";
-						if(!EasyZipAccess.checkHasAll(realFile.getPath(), 
-								extractBase, excludes, "")) {
-							installState = 0;
-							return false;
-						}
 					}
 				}
 				
@@ -449,7 +408,7 @@ public class RunnableModule extends Module {
 		return moduleInfo.mainClass;
 	}
 	
-	public String getClassPath(boolean useRunPath) {
+	public String getClassPath() {
 		StringBuilder sb = new StringBuilder();
 		String separator = System.getProperty("path.separator");
 		
@@ -463,11 +422,8 @@ public class RunnableModule extends Module {
 			sb.append(separator);
 		}
 
-		if(useRunPath) {
-			sb.append(getModuleJarRunPath().replace('/', System.getProperty("file.separator").charAt(0)));
-		} else {
-			sb.append(getModuleJarPath().replace('/', System.getProperty("file.separator").charAt(0)));
-		}
+		sb.append(getModuleJarPath().replace('/', System.getProperty("file.separator").charAt(0)));
+
 		sb.append(separator);
 
 		if(sb.length() > 0)
@@ -475,21 +431,25 @@ public class RunnableModule extends Module {
 		return sb.toString();
 	}
 	
-	public String getNativePath() {
-		StringBuilder sb = new StringBuilder();
-		String separator = System.getProperty("path.separator");
+	public String getNativePath(String arch) {
+		String extractTarget = getModuleNativePath();
 		
 		for(int i=0; i<moduleInfo.libraries.size(); i++) {
 			Library lib = moduleInfo.libraries.get(i);
-			if(!lib.needDownloadInOS() || !lib.needExtract())
+			if(!lib.needDownloadInOS() || !lib.needExtract() ||
+					!lib.isCompatibleForArch(arch))
 				continue;
-			sb.append(lib.getNativeExtractedPath().replace('/', System.getProperty("file.separator").charAt(0)));
-			sb.append(separator);
+
+			List<String> excludes = lib.getExtractExclude();
+			String extractBase = extractTarget + "/";
+			File realFile = new File(lib.getRealFilePath());
+			if(!EasyZipAccess.checkHasAll(realFile.getPath(), 
+					extractBase, excludes, "")) {
+				extractLib(lib, realFile, extractBase);
+			}
 		}
 
-		if(sb.length() > 0)
-			sb.deleteCharAt(sb.length() - 1);
-		return sb.toString();
+		return extractTarget.replace('/', System.getProperty("file.separator").charAt(0));
 	}
 
 	public String getReleaseTime() {
@@ -574,16 +534,8 @@ public class RunnableModule extends Module {
 		return Config.TEMP_DIR + String.format(Config.MINECRAFT_VERSION_GAME_FORMAT, getName(), getName());
 	}
 	
-	private String getModuleJarRunPath() {
-		return Config.gamePath + String.format(Config.MINECRAFT_VERSION_GAME_RUN_FORMAT, getName(), getName());
-	}
-
-	private String getModuleJarExtractPath() {
-		return Config.TEMP_DIR + String.format(Config.MINECRAFT_VERSION_GAME_EXTRACT_FORMAT, getName(), getName());
-	}
-	
-	private String getModuleJarExtractTempPath() {
-		return Config.TEMP_DIR + String.format(Config.MINECRAFT_VERSION_GAME_EXTRACT_TEMP_FORMAT, getName(), getName());
+	private String getModuleNativePath() {
+		return Config.gamePath + String.format(Config.MINECRAFT_VERSION_NATIVE_PATH_FORMAT, getName(), getName());
 	}
 	
 	private String getModuleAssetsIndexUrl() {
@@ -606,6 +558,7 @@ public class RunnableModule extends Module {
 		try {
 			moduleInfo = new RunnableModuleInfo(new JSONObject(resourceStr));
 		} catch(Exception e) {
+			e.printStackTrace();
 			return false;
 		}
 		return true;
@@ -624,6 +577,7 @@ public class RunnableModule extends Module {
 		try {
 			moduleAssets = new RunnableModuleAssets(new JSONObject(resourceStr), getAssetsIndex());
 		} catch(Exception e) {
+			e.printStackTrace();
 			return false;
 		}
 		return true;

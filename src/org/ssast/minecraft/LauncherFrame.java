@@ -342,7 +342,10 @@ public class LauncherFrame extends JFrame {
 	public void setStdOut() {
 		thisStdOut = new PrintStream(new ConsoleOutputStream(), true);
 		oldStdOut = System.out;
-		System.setOut(thisStdOut);
+		if(Config.showDebugInfo) {
+			System.setOut(thisStdOut);
+			System.setErr(thisStdOut);
+		}
 	}
 
 	public void outputConsole(final String message) {

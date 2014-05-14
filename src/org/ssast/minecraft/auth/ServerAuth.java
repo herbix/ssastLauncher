@@ -25,7 +25,7 @@ public abstract class ServerAuth {
 	private String playerName;
 	private String uuid;
 	private String userType;
-	private Map<String, Collection<String>> userProperties = new HashMap<String, Collection<String>>();
+	private Map<String, Collection<Object>> userProperties = new HashMap<String, Collection<Object>>();
 
 	/**
 	 * Login user name and password should be passed to this constructor.
@@ -38,7 +38,7 @@ public abstract class ServerAuth {
 		this.name = name;
 		this.pass = pass;
 		this.playerName = name;
-		this.uuid = new UUID(0, 0).toString();
+		this.uuid = new UUID(0, 0).toString().replace("-", "");
 		this.accessToken = "-";
 		this.setUserType("legacy");
 	}
@@ -180,7 +180,7 @@ public abstract class ServerAuth {
 	/**
 	 * @return Current user properties
 	 */
-	public Map<String, Collection<String>> getUserProperties() {
+	public Map<String, Collection<Object>> getUserProperties() {
 		return userProperties;
 	}
 	

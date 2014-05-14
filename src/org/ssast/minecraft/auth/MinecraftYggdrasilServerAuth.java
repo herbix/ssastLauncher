@@ -1,6 +1,7 @@
 package org.ssast.minecraft.auth;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,6 +80,30 @@ public class MinecraftYggdrasilServerAuth extends ServerAuth {
 		setAccessToken(resultObj.getString("accessToken"));
 
 		setUserType("mojang");
+		
+		if(resultObj.has("user")) {
+			Map<String, Collection<Object>> properties = getUserProperties();
+			JSONObject user = resultObj.getJSONObject("user");
+			
+			if(user.has("properties")) {
+				JSONArray arr = user.getJSONArray("properties");
+				
+				for(int i=0; i<arr.length(); i++) {
+					JSONObject item = arr.getJSONObject(i);
+					String name = item.getString("name");
+					Object value = item.get("value");
+					
+					Collection<Object> list = properties.get(name);
+					if(list == null) {
+						list = new ArrayList<Object>();
+						properties.put(name, list);
+					}
+					
+					list.add(value);
+				}
+			}
+		}
+		
 		callback.authDone(this, true);
 	}
 

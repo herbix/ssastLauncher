@@ -77,12 +77,13 @@ import java.util.Map;
  * @author JSON.org
  * @version 2013-04-18
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class JSONArray {
 
     /**
      * The arrayList where the JSONArray's properties are kept.
      */
-    private final ArrayList myArrayList;
+	private final ArrayList myArrayList;
 
     /**
      * Construct an empty JSONArray.
@@ -99,7 +100,7 @@ public class JSONArray {
      * @throws JSONException
      *             If there is a syntax error.
      */
-    public JSONArray(JSONTokener x) throws JSONException {
+	public JSONArray(JSONTokener x) throws JSONException {
         this();
         if (x.nextClean() != '[') {
             throw x.syntaxError("A JSONArray text must start with '['");

@@ -35,6 +35,8 @@ public class Runner {
 		String java = Config.jrePath + "/bin/java";
 		
 		java = java.replace('/', System.getProperty("file.separator").charAt(0));
+
+		String javaraw = java;
 		
 		if(OS.getCurrentPlatform() == OS.WINDOWS) {
 			if(new File(java + "w.exe").exists()) {
@@ -59,13 +61,18 @@ public class Runner {
 		
 		params.add("-cp");
 		String cp = "";
-		if(!cp.equals(""))
-			cp += System.getProperty("path.separator");
-		cp += module.getClassPath(!cp.equals(""));
+		cp += module.getClassPath();
 
 		params.add(cp);
-		
-		params.add("-Djava.library.path=" + module.getNativePath());
+
+		String arch = isJre64Bit(javaraw) ? "64" : "32";
+
+		if(Config.d64)
+			arch = "64";
+		if(Config.d32)
+			arch = "32";
+
+		params.add("-Djava.library.path=" + module.getNativePath(arch));
 		
 		if(Config.d64)
 			params.add("-d64");
@@ -108,28 +115,33 @@ public class Runner {
 		
 		return true;
 	}
-	
+
 	private static final Pattern paramPattern = Pattern.compile("\\$\\{([a-zA-Z0-9_]*)\\}");
 	
 	private boolean replaceParams(String[] gameParams, Map<String, String> map) {
 		StringBuilder sb = new StringBuilder();
+		
 		for(int i=0; i<gameParams.length; i++) {
 			String param = gameParams[i];
 			Matcher m = paramPattern.matcher(param);
 			int lastend = 0;
 			sb.setLength(0);
+			
 			while(m.find()) {
 				sb.append(param, lastend, m.start());
 				String key = m.group(1);
 				String value = map.get(key);
+				
 				if(value == null) {
 					System.out.println(Lang.getString("msg.run.unknownparam1") +
 							key + Lang.getString("msg.run.unknownparam2"));
 					return false;
 				}
+				
 				sb.append(value);
 				lastend = m.end();
 			}
+			
 			sb.append(param, lastend, param.length());
 			gameParams[i] = sb.toString();
 		}
@@ -142,20 +154,49 @@ public class Runner {
 			ProcessBuilder pb = new ProcessBuilder(params.toArray(new String[params.size()]));
 			pb.directory(new File(Config.gamePath));
 			pb.redirectErrorStream(true);
+
 			Process p = pb.start();
+
 			if(Config.showDebugInfo) {
 				OutputStream out = new FileOutputStream("last.log");
 				InputStream in = p.getInputStream();
 				byte[] buffer = new byte[65536];
 				int n;
+				
+				out.write(("Running with params : " + params + "\r\n").getBytes());
+				
 				while((n = in.read(buffer)) >= 0) {
 					out.write(buffer, 0, n);
 				}
 				out.close();
 			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
+	}
+	
+	private boolean isJre64Bit(String java) {
+		try {
+			ProcessBuilder pb = new ProcessBuilder(java, "-version");
+			pb.redirectErrorStream(true);
+			Process p = pb.start();
+
+			InputStream in = p.getInputStream();
+			StringBuilder sb = new StringBuilder();
+			byte[] buffer = new byte[1024];
+			int n;
+
+			while((n = in.read(buffer)) >= 0) {
+				sb.append(new String(buffer, 0, n));
+			}
+			
+			return sb.toString().toLowerCase().contains("64-bit");
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 }

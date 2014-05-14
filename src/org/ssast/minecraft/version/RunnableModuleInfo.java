@@ -32,7 +32,11 @@ public class RunnableModuleInfo {
 		JSONArray libs = json.getJSONArray("libraries");
 		libraries = new ArrayList<Library>();
 		for(int i=0; i<libs.length(); i++) {
-			libraries.add(new Library(libs.getJSONObject(i)));
+			Library lib = new Library(libs.getJSONObject(i));
+			libraries.add(lib);
+			if(lib.have64BitVersion()) {
+				libraries.add(lib.clone64Version());
+			}
 		}
 		
 		if(json.has("rules")) {
