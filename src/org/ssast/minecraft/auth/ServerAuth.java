@@ -38,7 +38,7 @@ public abstract class ServerAuth {
 		this.name = name;
 		this.pass = pass;
 		this.playerName = name;
-		this.uuid = new UUID(0, 0).toString().replace("-", "");
+		this.uuid = null;
 		this.accessToken = "-";
 		this.setUserType("legacy");
 	}
@@ -111,7 +111,7 @@ public abstract class ServerAuth {
 	}
 
 	/**
-	 * This uuid will passed to minecraft game (in future).
+	 * This uuid will passed to minecraft game.
 	 * @param uuid The uuid you need to set
 	 *        (default is UUID(0, 0))
 	 */
@@ -120,10 +120,16 @@ public abstract class ServerAuth {
 	}
 
 	/**
-	 * This uuid will passed to minecraft game (in future).
+	 * This uuid will passed to minecraft game.
+	 * If login method doesn't specify a uuid, the method will
+	 * return a uuid based on player name.
 	 * @return The uuid
 	 */
 	public String getUuid() {
+		if (uuid == null) {
+			return UUID.nameUUIDFromBytes(playerName.getBytes()).
+					toString().replace("-", "");
+		}
 		return uuid;
 	}
 	
@@ -178,6 +184,8 @@ public abstract class ServerAuth {
 	}
 
 	/**
+	 * Objects saved in collection must be readable by json creator.
+	 * e.g. Array, Collection, Map, String, and basic types.
 	 * @return Current user properties
 	 */
 	public Map<String, Collection<Object>> getUserProperties() {

@@ -27,7 +27,7 @@ import org.ssast.minecraft.version.Version;
 
 public class Launcher {
 
-	private static final String helpWords = "SSAST Launcher V1.6.5\n" + Lang.getString("msg.help");
+	private static final String helpWords = "SSAST Launcher V1.6.6\n" + Lang.getString("msg.help");
 
 	private LauncherFrame frame = null;
 

@@ -1,3 +1,6 @@
+1.6.6
+会给离线玩家也设置uuid，不过不一定和minecraft原有的uuid机制相匹配
+
 1.6.5
 重构了ServerAuth相关类名
 不再生成_run.jar文件
