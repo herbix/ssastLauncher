@@ -12,19 +12,13 @@ msg.auth.minelogin.failed.4=Need verify.
 msg.auth.minelogin.failed.5=Bad password.
 msg.auth.skinme.donthavechar=You don't have this character.
 
-msg.download.failed=Failed to download: 
-msg.download.start=Start downloading: 
-msg.download.succeeded=Downloading finished: 
+msg.download.failed=Download failed: 
+msg.download.start=Start download: 
+msg.download.succeeded=Download finished: 
 
 msg.game.basicrequire=You need assets and at least one game module to start game.
 msg.game.nousername=Please input user name.
 msg.game.isloggingin=The system is trying to log in.
-
-msg.mod.alreadyloaded=This mod has been loaded.
-msg.mod.conflict=This mod conflicts with loaded mod(s).
-msg.mod.required.error=This auth type doesn't support this version.
-msg.mod.required.conflict=This auth type uses special mod, which conflicts with loaded mod(s). Try change auth type, or unload some mods.
-msg.mod.noselection=Please select a mod first.
 
 msg.module.alreadyinstalled=This module has been installed. 
 msg.module.failed=Installation failed.
@@ -59,15 +53,6 @@ msg.assets.cannotload=Cannot load assets files.
 msg.run.unknownparam1=There is no param "
 msg.run.unknownparam2=".
 msg.twitch.inputname=Please input your player name:
-
-ui.crash.default=Unable to find minecraft crash report file. This is standard output of minecraft:\n
-ui.crash.title=Minecraft Crashed!
-
-ui.mod.label=Mods: 
-ui.mod.load=Load
-ui.mod.loaded=Loaded
-ui.mod.notloaded=
-ui.mod.unload=Unload
 
 ui.mode.d32=-d32
 ui.mode.d64=-d64
@@ -107,7 +92,7 @@ ui.offline=Offline
 ui.ok=OK
 ui.cancel=Cancel
 ui.password.label=Password:
-ui.savepassword=Save Login
+ui.savepassword=Save Password
 ui.username.label=User Name:
 ui.version.label=Version:
 

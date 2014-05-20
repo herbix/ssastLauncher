@@ -150,7 +150,7 @@ public class LauncherFrame extends JFrame {
 		console.setWrapStyleWord(true);
 
 		base.add(modulesLabel);
-		modulesLabel.setLocation(0, 0);
+		modulesLabel.setLocation(5, 0);
 		modulesLabel.setSize(300, 20);
 		
 		base.add(modulesOuter);

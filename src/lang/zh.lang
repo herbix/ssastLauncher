@@ -22,12 +22,6 @@ msg.game.basicrequire=需要资源和至少一个游戏版本才能开始游戏
 msg.game.nousername=请输入用户名
 msg.game.isloggingin=正在尝试登录
 
-msg.mod.alreadyloaded=此mod已被使用
-msg.mod.conflict=此mod和已使用mod有冲突
-msg.mod.required.error=这种登录方式不支持这个版本
-msg.mod.required.conflict=本登录方式使用了特别的mod，和当前使用的mod有冲突。请更换登录方式，或者取消这些有冲突的mod
-msg.mod.noselection=请选择一个mod
-
 msg.module.alreadyinstalled=此组件已被安装
 msg.module.failed=安装失败
 msg.module.isinstalling=正在安装这个组件
@@ -64,15 +58,6 @@ msg.assets.cannotload=无法复制资源文件
 msg.run.unknownparam1=运行时错误，不存在参数“
 msg.run.unknownparam2=”
 msg.twitch.inputname=请输入你想要的角色名：
-
-ui.crash.default=找不到崩溃报告文件，控制台输出：\u000a
-ui.crash.title=Minecraft运行时出错
-
-ui.mod.label=置入式mod（forge，modloader等）：
-ui.mod.load=使用mod
-ui.mod.loaded=已使用
-ui.mod.notloaded=
-ui.mod.unload=取消mod
 
 ui.mode.d32=32位
 ui.mode.d64=64位
