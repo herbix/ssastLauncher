@@ -34,7 +34,8 @@ import org.ssast.minecraft.version.Version;
 
 public class Launcher {
 
-	private static final String helpWords = "SSAST Launcher V1.6.7\n" + Lang.getString("msg.help");
+	private static final String VERSION = "1.6.6";
+	private static final String helpWords = "SSAST Launcher V" + VERSION + "\n" + Lang.getString("msg.help");
 
 	private LauncherFrame frame = null;
 
@@ -318,7 +319,7 @@ public class Launcher {
 			conn.addRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
 			conn.addRequestProperty("Content-Length", String.valueOf(toSend.length));
 			conn.setDoOutput(true);
-			conn.setDoOutput(false);
+			conn.setDoInput(false);
 			conn.connect();
 
 			OutputStream os = conn.getOutputStream();
@@ -355,7 +356,7 @@ public class Launcher {
 			String str = out.toString();
 			JOptionPane.showMessageDialog(null, Lang.getString("msg.main.error") + str,
 					Lang.getString("msg.main.error.title"), JOptionPane.ERROR_MESSAGE);
-			exceptionReport(str);
+			exceptionReport("Version " + VERSION + ":\n" + str);
 		}
 	}
 }
