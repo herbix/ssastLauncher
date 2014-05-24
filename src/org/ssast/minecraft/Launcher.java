@@ -319,13 +319,14 @@ public class Launcher {
 			conn.addRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
 			conn.addRequestProperty("Content-Length", String.valueOf(toSend.length));
 			conn.setDoOutput(true);
-			conn.setDoInput(false);
 			conn.connect();
 
 			OutputStream os = conn.getOutputStream();
 			os.write(toSend);
 			os.flush();
 			os.close();
+			
+			conn.getResponseCode();
 
 		} catch (Exception e) {
 			e.printStackTrace();
