@@ -47,6 +47,9 @@ msg.profile.removeconfirm=Are you sure you want to remove this profile?
 msg.profile.exists=Profile with this name has existed.
 msg.profile.inputname=Please input a profile name:
 
+msg.main.error=An error occurred:\u000A
+msg.main.error.title=Error
+
 msg.gamepath.error=Unable to use '.minecraft' directory.
 msg.help=Bug report: herbix@163.com.
 msg.jrepath.error=Unable to run java from specified jre path.

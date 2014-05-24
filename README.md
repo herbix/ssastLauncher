@@ -13,21 +13,16 @@ Github推荐我弄个README，我就弄了。
 
 最新版本
 =============
-<b>1.6.5</b><br>
-重构了ServerAuth相关类名<br>
-不再生成_run.jar文件<br>
-运行前检测jre是32位还是64位<br>
-下载时要下载32位和64位对应的native库<br>
-现在native库只有在运行时才会解压<br>
-增加了twitch直播功能<br>
-可以进行离线直播（选择Twitch登录方式并用Mojang账号登录）<br>
+<b>1.6.6</b><br>
+会给离线玩家也设置uuid，不过不和minecraft原有的uuid机制相匹配<br>
+删除了本地化里面多余的语句<br>
+添加了繁体中文版本<br>
+修复了会出现ExceptionInInitializerError的问题<br>
+加了启动时出错的提示，并发出出错报告<br>
 
 未来版本
 =============
-<b>1.6.6</b><br>
-会给离线玩家也设置uuid，不过不一定和minecraft原有的uuid机制相匹配<br>
-删除了本地化里面多余的语句<br>
-添加了繁体中文版本<br>
+<b>1.6.7</b><br>
 
 历史版本
 =============

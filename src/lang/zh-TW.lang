@@ -48,6 +48,9 @@ msg.profile.cannotremovedefault=不能刪除預設配置
 msg.profile.removeconfirm=是否要刪除當前配置？
 msg.profile.inputname=輸入新配置的名稱：
 
+msg.main.error=出現錯誤：\u000A
+msg.main.error.title=錯誤
+
 msg.gamepath.error=無法使用.minecraft目錄！
 msg.help=如果有bug請聯繫herbix@163.com
 msg.jrepath.error=無法啟動java，請檢查jre路徑

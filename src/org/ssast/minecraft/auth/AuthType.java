@@ -9,22 +9,7 @@ import org.ssast.minecraft.util.ClassUtil;
 public class AuthType {
 
 	private static List<AuthType> values = new ArrayList<AuthType>();
-
-	static {
-		new AuthType(MinecraftYggdrasilServerAuth.class);
-		new AuthType(OfflineServerAuth.class);
-		
-		Class<?>[] authClasses = ClassUtil.getClassesFromPackage("org.ssast.minecraft.auth", false);
-		
-		for(Class<?> authClass : authClasses) {
-			if(authClass.getSuperclass() != null &&
-				authClass.getSuperclass().equals(ServerAuth.class) &&
-				!authClass.equals(OfflineServerAuth.class) &&
-				!authClass.equals(MinecraftYggdrasilServerAuth.class)) {
-				new AuthType(authClass);
-			}
-		}
-	}
+	private static boolean authTypeInited = false;
 
 	private String name;
 	private Class<?> auth;
@@ -66,7 +51,27 @@ public class AuthType {
 		return alias;
 	}
 
+	private static void initAuthType() {
+		new AuthType(MinecraftYggdrasilServerAuth.class);
+		new AuthType(OfflineServerAuth.class);
+		
+		Class<?>[] authClasses = ClassUtil.getClassesFromPackage("org.ssast.minecraft.auth", false);
+		
+		for(Class<?> authClass : authClasses) {
+			if(authClass.getSuperclass() != null &&
+				authClass.getSuperclass().equals(ServerAuth.class) &&
+				!authClass.equals(OfflineServerAuth.class) &&
+				!authClass.equals(MinecraftYggdrasilServerAuth.class)) {
+				new AuthType(authClass);
+			}
+		}
+	}
+
 	public static AuthType valueOf(String value) {
+		if(!authTypeInited) {
+			initAuthType();
+			authTypeInited = true;
+		}
 		for(AuthType at : values) {
 			if(at.value().equals(value)) {
 				return at;
@@ -78,6 +83,10 @@ public class AuthType {
 	}
 
 	public static List<AuthType> values() {
+		if(!authTypeInited) {
+			initAuthType();
+			authTypeInited = true;
+		}
 		return values;
 	}
 

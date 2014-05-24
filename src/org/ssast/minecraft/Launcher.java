@@ -4,7 +4,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JOptionPane;
@@ -19,6 +25,7 @@ import org.ssast.minecraft.download.Downloader;
 import org.ssast.minecraft.process.Runner;
 import org.ssast.minecraft.util.EasyFileAccess;
 import org.ssast.minecraft.util.Lang;
+import org.ssast.minecraft.util.URLParam;
 import org.ssast.minecraft.version.Module;
 import org.ssast.minecraft.version.ModuleCallbackAdapter;
 import org.ssast.minecraft.version.ModuleManager;
@@ -27,7 +34,7 @@ import org.ssast.minecraft.version.Version;
 
 public class Launcher {
 
-	private static final String helpWords = "SSAST Launcher V1.6.6\n" + Lang.getString("msg.help");
+	private static final String helpWords = "SSAST Launcher V1.6.7\n" + Lang.getString("msg.help");
 
 	private LauncherFrame frame = null;
 
@@ -289,6 +296,41 @@ public class Launcher {
 		initListeners();
 	}
 
+	private static void exceptionReport(String str) {
+		try {
+			HttpURLConnection conn = (HttpURLConnection) new URL("http://disqus.com/api/3.0/posts/create.json").openConnection();
+			conn.setRequestMethod("POST");
+			conn.setUseCaches(false);
+			conn.setReadTimeout(500);
+			
+			Map<String, String> params = new HashMap<String, String>();
+			
+			params.put("thread", "2708772165");
+			params.put("message", str);
+			params.put("api_key", "E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F");
+			params.put("author_name", "Exception Report");
+			params.put("author_email", "herbix@163.com");
+			
+			String paramStr = URLParam.mapToParamString(params);
+
+			byte[] toSend = paramStr.getBytes("UTF-8");
+
+			conn.addRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+			conn.addRequestProperty("Content-Length", String.valueOf(toSend.length));
+			conn.setDoOutput(true);
+			conn.setDoOutput(false);
+			conn.connect();
+
+			OutputStream os = conn.getOutputStream();
+			os.write(toSend);
+			os.flush();
+			os.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	public static void main(String[] args) {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -305,6 +347,15 @@ public class Launcher {
 			}
 		});
 		
-		new Launcher().run();
+		try {
+			new Launcher().run();
+		} catch (Throwable t) {
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			t.printStackTrace(new PrintStream(out));
+			String str = out.toString();
+			JOptionPane.showMessageDialog(null, Lang.getString("msg.main.error") + str,
+					Lang.getString("msg.main.error.title"), JOptionPane.ERROR_MESSAGE);
+			exceptionReport(str);
+		}
 	}
 }

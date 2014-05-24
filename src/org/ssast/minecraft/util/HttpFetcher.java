@@ -212,4 +212,5 @@ public final class HttpFetcher {
 			return null;
 		return new String(out.toByteArray());
 	}
+
 }
