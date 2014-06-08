@@ -24,11 +24,11 @@ public class MinecraftTwitchServerAuth extends ServerAuth {
 		String token = "SSASTLauncher" + System.nanoTime();
 		
 		JSONObject obj = new JSONObject();
-		obj.accumulate("agent", "Minecraft");
-		obj.accumulate("username", getName());
-		obj.accumulate("password", getPass());
-		obj.accumulate("clientToken", token);
-		obj.accumulate("requestUser", true);
+		obj.put("agent", "Minecraft");
+		obj.put("username", getName());
+		obj.put("password", getPass());
+		obj.put("clientToken", token);
+		obj.put("requestUser", true);
 		
 		String result = HttpFetcher.fetchUsePostMethod("https://authserver.mojang.com/authenticate", obj);
 		

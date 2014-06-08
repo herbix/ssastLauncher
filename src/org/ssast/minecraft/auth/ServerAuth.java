@@ -199,14 +199,15 @@ public abstract class ServerAuth {
 	 * @param chars The character list
 	 * @return User selection, or <i>null</i> if user press cancel
 	 */
-	public Object selectFrom(List<Object> chars) {
+	@SuppressWarnings("unchecked")
+	public <T> T selectFrom(List<T> chars) {
 		CharSelectDialog dlg = new CharSelectDialog();
-		for(Object o : chars) {
+		for(T o : chars) {
 			dlg.chars.addItem(o);
 		}
 		dlg.setVisible(true);
 		if(dlg.selected) {
-			return dlg.chars.getSelectedItem();
+			return (T) dlg.chars.getSelectedItem();
 		}
 		return null;
 	}

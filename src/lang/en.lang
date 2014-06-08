@@ -59,6 +59,7 @@ msg.assets.cannotload=Cannot load assets files.
 msg.run.unknownparam1=There is no param "
 msg.run.unknownparam2=".
 msg.twitch.inputname=Please input your player name:
+msg.yggdrasil.saved=Cannot connect to login server. Would you like to use local authentication data as your login sessions?
 
 ui.mode.d32=-d32
 ui.mode.d64=-d64
