@@ -351,10 +351,8 @@ public class LauncherFrame extends JFrame {
 	public void outputConsole(final String message) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				synchronized(console) {
-					console.append(message);
-					consoleOuter.getVerticalScrollBar().setValue(999999);
-				}
+				console.append(message);
+				consoleOuter.getVerticalScrollBar().setValue(999999);
 			}
 		});
 	}
