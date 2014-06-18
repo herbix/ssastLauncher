@@ -6,10 +6,13 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.swing.JOptionPane;
 
 import org.ssast.minecraft.util.Lang;
@@ -17,27 +20,33 @@ import org.ssast.minecraft.util.OS;
 
 public class Updater {
 
+	private static final String UPDATE_URL = "https://raw.githubusercontent.com/herbix/ssastLauncher/master/build/SSASTLauncher.jar";
+
 	private boolean filePropertyGot = false;
 
 	private String currentFile;
 	
-	private byte[] lock = new byte[0];
-	
-	private String eTag = "";
-	private int size = 0;
+	private long lastModified = Long.MIN_VALUE;
 	
 	private boolean getRemoteFileInfo() throws Exception {
+		final byte[] lock = new byte[0];
+		
 		Thread downloadFile = new Thread() {
 			public void run() {
-				URLConnection conn;
+				HttpsURLConnection conn;
 				try {
-					conn = new URL("https://raw.githubusercontent.com/herbix/ssastLauncher/master/build/SSASTLauncher.jar").openConnection();
+					conn = (HttpsURLConnection) new URL(UPDATE_URL).openConnection();
 					conn.setReadTimeout(500);
+					String timeStr = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss 'GMT'", Locale.US).format(new Date(lastModified));
+					conn.addRequestProperty("If-Modified-Since", timeStr);
+					conn.setDoOutput(false);
 					conn.connect();
-					size = conn.getContentLength();
-					eTag = conn.getHeaderField("ETag");
-					eTag = eTag.substring(1, eTag.length()-1);
-					conn.getInputStream().close();
+					if(200 != conn.getResponseCode()) {
+						synchronized (lock) {
+							lock.notify();
+						}
+						return;
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -50,14 +59,10 @@ public class Updater {
 		
 		synchronized (lock) {
 			downloadFile.start();
-			lock.wait();
+			lock.wait(500);
 		}
 		
 		return filePropertyGot;
-	}
-
-	private boolean checkSizeEqual() {
-		return size == new File(currentFile).length();
 	}
 
 	private boolean extractUpdater() throws Exception {
@@ -88,13 +93,11 @@ public class Updater {
 		if(Config.dontUpdateUntil > new Date().getTime()) {
 			return;
 		}
-		
-		eTag = Config.currentETag;
 
 		try {
 			currentFile = URLDecoder.decode(
 				Launcher.class.getResource("/org/ssast/minecraft/Launcher.class").toString(), "UTF-8");
-			
+
 			if(!currentFile.startsWith("jar:")) {
 				return;
 			}
@@ -102,16 +105,9 @@ public class Updater {
 			currentFile = currentFile.substring(4 + 5);
 			currentFile = currentFile.substring(0, currentFile.lastIndexOf('!'));
 
+			lastModified = new File(currentFile).lastModified();
+
 			if(!getRemoteFileInfo())
-				return;
-
-			if(Config.currentETag.equals(""))
-				if(checkSizeEqual()) {
-					Config.currentETag = eTag;
-					return;
-				}
-
-			if(eTag.equals(Config.currentETag))
 				return;
 			
 			if(!extractUpdater())
@@ -120,16 +116,16 @@ public class Updater {
 			int selection = JOptionPane.showConfirmDialog(null, Lang.getString("msg.update.request"), "SSAST Launcher", JOptionPane.YES_NO_OPTION);
 			if(selection != JOptionPane.YES_OPTION) {
 				Config.dontUpdateUntil = new Date().getTime() + 7 * 24 * 60 * 60 * 1000;
-				eTag = Config.currentETag;
 				return;
 			}
 			
 			UpdateDialog dialog = null;
 			
 			try {
-				URLConnection conn = new URL("https://raw.githubusercontent.com/herbix/ssastLauncher/master/build/SSASTLauncher.jar").openConnection();
+				URLConnection conn = new URL(UPDATE_URL).openConnection();
 				conn.setReadTimeout(500);
 				InputStream in = conn.getInputStream();
+				int size = conn.getContentLength();
 				dialog = new UpdateDialog();
 				dialog.setVisible(true);
 				
@@ -164,10 +160,11 @@ public class Updater {
 						java += "w.exe";
 					}
 				}
-				
-				Config.currentETag = eTag;
+
 				Config.dontUpdateUntil = Long.MIN_VALUE;
 				Config.saveConfig();
+				
+				tempFile.setLastModified(conn.getLastModified());
 				
 				ProcessBuilder pb = new ProcessBuilder(java, "-cp", Config.TEMP_DIR, "org.ssast.minecraft.UpdaterLater", 
 						tempFile.getAbsolutePath(), currentFile);

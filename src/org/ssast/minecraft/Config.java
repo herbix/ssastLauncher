@@ -56,7 +56,6 @@ public class Config {
 	public static int memory = 1024;
 	public static String gamePath = Util.getWorkingDirectory().getPath();
 	public static String gamePathOld = gamePath;
-	public static String currentETag = "";
 	public static long dontUpdateUntil = Long.MIN_VALUE;
 	public static boolean showDebugInfo = false;
 	public static boolean showOld = false;
@@ -69,7 +68,6 @@ public class Config {
 		p.setProperty("d32", String.valueOf(d32));
 		p.setProperty("memory", String.valueOf(memory));
 		p.setProperty("game-path", gamePathOld);
-		p.setProperty("current-etag", currentETag);
 		p.setProperty("dont-update-until", String.valueOf(dontUpdateUntil));
 		String profileList = "";
 		for(String profileName : profiles.keySet()) {
@@ -125,9 +123,6 @@ public class Config {
 			} catch (Exception e) {	}
 			gamePathOld = p.getProperty("game-path", Util.getWorkingDirectory().getPath());
 			gamePath = new File(gamePathOld).getAbsolutePath();
-			try {
-				currentETag = p.getProperty("current-etag", "");
-			} catch (Exception e) {	}
 			try {
 				dontUpdateUntil = Long.valueOf(p.getProperty("dont-update-until", String.valueOf(Long.MIN_VALUE)));
 			} catch (Exception e) {	}
