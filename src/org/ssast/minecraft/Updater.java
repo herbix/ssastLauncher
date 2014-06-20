@@ -52,7 +52,7 @@ public class Updater {
 		
 		synchronized (lock) {
 			downloadFile.start();
-			lock.wait();
+			lock.wait(500);
 		}
 		
 		return filePropertyGot;
