@@ -187,6 +187,7 @@ public class Updater {
 		
 		} catch (Exception e) {
 			e.printStackTrace();
+			Launcher.exceptionReport(e);
 		}
 	}
 }

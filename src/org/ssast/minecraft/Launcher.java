@@ -297,7 +297,14 @@ public class Launcher {
 		initListeners();
 	}
 
-	private static void exceptionReport(String str) {
+	public static void exceptionReport(Throwable t) {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		t.printStackTrace(new PrintStream(out));
+		String str = out.toString();
+		exceptionReport(str);
+	}
+
+	public static void exceptionReport(String str) {
 		try {
 			HttpURLConnection conn = (HttpURLConnection) new URL("http://disqus.com/api/3.0/posts/create.json").openConnection();
 			conn.setRequestMethod("POST");
@@ -307,7 +314,7 @@ public class Launcher {
 			Map<String, String> params = new HashMap<String, String>();
 			
 			params.put("thread", "2708772165");
-			params.put("message", str);
+			params.put("message", "Version " + VERSION + ":\n" + str);
 			params.put("api_key", "E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F");
 			params.put("author_name", "Exception Report");
 			params.put("author_email", "herbix@163.com");
@@ -357,7 +364,7 @@ public class Launcher {
 			String str = out.toString();
 			JOptionPane.showMessageDialog(null, Lang.getString("msg.main.error") + str,
 					Lang.getString("msg.main.error.title"), JOptionPane.ERROR_MESSAGE);
-			exceptionReport("Version " + VERSION + ":\n" + str);
+			exceptionReport(str);
 		}
 	}
 }

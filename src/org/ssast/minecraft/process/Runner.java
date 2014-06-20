@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 
 import org.json.JSONObject;
 import org.ssast.minecraft.Config;
+import org.ssast.minecraft.Launcher;
 import org.ssast.minecraft.auth.ServerAuth;
 import org.ssast.minecraft.util.Lang;
 import org.ssast.minecraft.util.OS;
@@ -173,6 +174,7 @@ public class Runner {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
+			Launcher.exceptionReport(e);
 		}
 
 	}

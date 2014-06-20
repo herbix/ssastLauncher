@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONObject;
 import org.ssast.minecraft.Config;
+import org.ssast.minecraft.Launcher;
 import org.ssast.minecraft.download.DownloadCallbackAdapter;
 import org.ssast.minecraft.download.Downloadable;
 import org.ssast.minecraft.download.Downloader;
@@ -559,6 +560,7 @@ public class RunnableModule extends Module {
 			moduleInfo = new RunnableModuleInfo(new JSONObject(resourceStr));
 		} catch(Exception e) {
 			e.printStackTrace();
+			Launcher.exceptionReport(e);
 			return false;
 		}
 		return true;
@@ -578,6 +580,7 @@ public class RunnableModule extends Module {
 			moduleAssets = new RunnableModuleAssets(new JSONObject(resourceStr), getAssetsIndex());
 		} catch(Exception e) {
 			e.printStackTrace();
+			Launcher.exceptionReport(e);
 			return false;
 		}
 		return true;
