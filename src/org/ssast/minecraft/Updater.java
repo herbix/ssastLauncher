@@ -17,21 +17,23 @@ import org.ssast.minecraft.util.OS;
 
 public class Updater {
 
+	private static final String UPDATE_URL = "https://raw.githubusercontent.com/herbix/ssastLauncher/master/build/SSASTLauncher.jar";
+
 	private boolean filePropertyGot = false;
 
 	private String currentFile;
-	
-	private byte[] lock = new byte[0];
 	
 	private String eTag = "";
 	private int size = 0;
 	
 	private boolean getRemoteFileInfo() throws Exception {
+		final byte[] lock = new byte[0];
+		
 		Thread downloadFile = new Thread() {
 			public void run() {
 				URLConnection conn;
 				try {
-					conn = new URL("https://raw.githubusercontent.com/herbix/ssastLauncher/master/build/SSASTLauncher.jar").openConnection();
+					conn = new URL(UPDATE_URL).openConnection();
 					conn.setReadTimeout(500);
 					conn.connect();
 					size = conn.getContentLength();
@@ -127,7 +129,7 @@ public class Updater {
 			UpdateDialog dialog = null;
 			
 			try {
-				URLConnection conn = new URL("https://raw.githubusercontent.com/herbix/ssastLauncher/master/build/SSASTLauncher.jar").openConnection();
+				URLConnection conn = new URL(UPDATE_URL).openConnection();
 				conn.setReadTimeout(500);
 				InputStream in = conn.getInputStream();
 				dialog = new UpdateDialog();
