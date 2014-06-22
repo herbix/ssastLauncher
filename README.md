@@ -1,4 +1,4 @@
-SSAST Minecraft Launcher
+SSAST Minecraft Launcher Concise
 =============
 
 Github推荐我弄个README，我就弄了。
@@ -13,13 +13,11 @@ Github推荐我弄个README，我就弄了。
 
 最新版本
 =============
-<b>1.6.7</b><br>
-添加了对launcher_profiles.json文件的读取和写入（仅限于正版登录方式）<br>
-正版登录如果没有成功，可以从历史记录中选择<br>
-修复了更新时可能会等很久的bug（貌似1.5.2版本没有好好修复……）<br>
+暂无
 
 未来版本
 =============
+<b>1.0.0</b><br>
 
 历史版本
 =============

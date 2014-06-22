@@ -17,7 +17,7 @@ import org.ssast.minecraft.util.OS;
 
 public class Updater {
 
-	private static final String UPDATE_URL = "https://raw.githubusercontent.com/herbix/ssastLauncher/master/build/SSASTLauncher.jar";
+	private static final String UPDATE_URL = "https://raw.githubusercontent.com/herbix/ssastLauncher/concise-version/build/SSASTLauncher.jar";
 
 	private boolean filePropertyGot = false;
 
