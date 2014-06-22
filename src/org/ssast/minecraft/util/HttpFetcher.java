@@ -10,6 +10,8 @@ import java.net.URL;
 import java.util.Map;
 import java.net.HttpURLConnection;
 
+import javax.swing.JProgressBar;
+
 import org.json.JSONObject;
 
 /**
@@ -19,6 +21,16 @@ import org.json.JSONObject;
  * @since SSAST Launcher 1.3.2
  */
 public final class HttpFetcher {
+	
+	private static final JProgressBar defpb = new JProgressBar();
+	private static JProgressBar progress = defpb;
+	
+	public static void setJProgressBar(JProgressBar p) {
+		if(p == null) {
+			progress = defpb;
+		}
+		progress = p;
+	}
 
 	private static HttpURLConnection createConnection(String url, String method, int downloaded, int len, String type)
 			throws 	IOException {
@@ -46,21 +58,28 @@ public final class HttpFetcher {
 	private static int pipeStream(InputStream in, OutputStream out, int downloaded, int length) throws IOException {
 		byte[] buffer = new byte[4096];
 		int count;
+		
+		int o = progress.getValue() / 100 * 100;
+		int n = 0;
+		if(length != 0) {
+			n = downloaded * 100 / length;
+		}
+
+		progress.setValue(o + n);
 
 		while ((count = in.read(buffer)) >= 0) {
 			downloaded += count;
 			if (count > 0) {
 				out.write(buffer, 0, count);
-				if(length > 0) {
-					int n = (downloaded * 80 / length) - (downloaded - count) * 80 / length;
-					for(int i=0; i<n; i++)
-						System.out.print(".");
+				if(length != 0) {
+					n = downloaded * 100 / length;
+					progress.setValue(o + n);
 				}
 			}
 		}
-		if(length > 0) {
-			System.out.print("\n");
-		}
+
+		progress.setValue(o + 100);
+		
 		return downloaded;
 	}
 

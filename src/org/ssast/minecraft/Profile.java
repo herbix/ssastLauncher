@@ -63,7 +63,6 @@ public class Profile {
 		frame.savePass.setSelected(savePass);
 		frame.authType.setSelectedItem(AuthType.valueOf(authType));
 		frame.gameVersion.setSelectedItem(version);
-		frame.runPath.setText(runPath);
 	}
 	
 	public void updateFromFrame(LauncherFrame frame) {
@@ -78,9 +77,7 @@ public class Profile {
 			version = frame.gameVersion.getSelectedItem().toString();
 		if(version == null)
 			version = "";
-		runPath = frame.runPath.getText();
-		if(runPath.equals(""))
-			runPath = Config.gamePath;
+		runPath = Config.gamePath;
 	}
 	
 	@Override

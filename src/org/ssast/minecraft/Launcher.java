@@ -2,8 +2,6 @@ package org.ssast.minecraft;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.OutputStream;
@@ -13,6 +11,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -29,6 +28,7 @@ import org.ssast.minecraft.util.URLParam;
 import org.ssast.minecraft.version.Module;
 import org.ssast.minecraft.version.ModuleCallbackAdapter;
 import org.ssast.minecraft.version.ModuleManager;
+import org.ssast.minecraft.version.RunnableModule;
 import org.ssast.minecraft.version.VersionManager;
 import org.ssast.minecraft.version.Version;
 
@@ -40,6 +40,8 @@ public class Launcher {
 	private LauncherFrame frame = null;
 
 	private Downloader mainDownloader = null;
+
+	private Map<String, RunnableModule> moduleFromChioceItem = new HashMap<String, RunnableModule>();
 
 	private ModuleCallbackAdapter mcallback = new ModuleCallbackAdapter() {
 		@Override
@@ -64,7 +66,6 @@ public class Launcher {
 		frame = new LauncherFrame();
 		Config.updateToFrame(frame);
 		frame.setVisible(true);
-		frame.setStdOut();
 	}
 
 	private void initMainDownloader() {
@@ -99,15 +100,32 @@ public class Launcher {
 	
 	private void refreshComponentsList() {
 		SwingUtilities.invokeLater(new Runnable() {
+
 			public void run() {
-				int i = frame.modules.getSelectedRow();
-				ModuleManager.showModules(frame.modulesModel);
-				frame.modules.getSelectionModel().setSelectionInterval(i, i);
-				
 				Object s = frame.gameVersion.getSelectedItem();
 				if(s == null)
 					s = Config.currentProfile.version;
-				ModuleManager.showModules(frame.gameVersion);
+
+				JComboBox list = frame.gameVersion;
+				Module[] modules = ModuleManager.modules;
+
+				list.removeAllItems();
+				moduleFromChioceItem.clear();
+				for(int i=0; i<modules.length; i++) {
+					Module m = modules[i];
+					if(!Config.showOld && m.getType().startsWith("old")) {
+						continue;
+					}
+					if(!Config.showSnapshot && m.getType().startsWith("snapshot")) {
+						continue;
+					}
+					if(!(m instanceof RunnableModule)) {
+						continue;
+					}
+					list.addItem(m.getName());
+					moduleFromChioceItem.put(m.getName(), (RunnableModule) m);
+				}
+				
 				frame.gameVersion.setSelectedItem(s);
 			}
 		});
@@ -140,60 +158,9 @@ public class Launcher {
 	}
 
 	private void initListeners() {
-		frame.installModules.addActionListener(new ModuleActionListener());
-		frame.uninstallModules.addActionListener(new ModuleActionListener());
 		frame.launch.addActionListener(new LaunchActionListener());
-		
-		frame.addProfile.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String name = JOptionPane.showInputDialog(frame, Lang.getString("msg.profile.inputname"), 
-					"SSAST Launcher", JOptionPane.QUESTION_MESSAGE);
-				if(name == null) {
-					return;
-				}
-				if(Config.profiles.containsKey(name)) {
-					System.out.println(Lang.getString("msg.profile.exists"));
-					return;
-				}
-				Profile profile = new Profile(name, null);
-
-				Config.profiles.put(name, profile);
-				frame.profiles.addItem(profile);
-				frame.profiles.setSelectedItem(profile);
-			}
-		});
-
-		frame.removeProfile.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if(Config.currentProfile.profileName.equals("(Default)")) {
-					System.out.println(Lang.getString("msg.profile.cannotremovedefault"));
-					return;
-				}
-				int r = JOptionPane.showConfirmDialog(frame, Lang.getString("msg.profile.removeconfirm"),
-					"SSAST Launcher", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-				if(r != JOptionPane.YES_OPTION) {
-					return;
-				}
-				Config.profiles.remove(Config.currentProfile.profileName);
-				frame.profiles.removeItem(Config.currentProfile);
-			}
-		});
-		
-		frame.profiles.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				Config.currentProfile.updateFromFrame(frame);
-				Config.currentProfile = (Profile)frame.profiles.getSelectedItem();
-				if(Config.currentProfile == null) {
-					Config.currentProfile = Config.profiles.get("(Default)");
-				}
-				Config.currentProfile.updateToFrame(frame);
-			}
-		});
-		
-		frame.showOld.addActionListener(new ShowInModuleListListener());
-		frame.showSnapshot.addActionListener(new ShowInModuleListListener());
 	}
-
+/*
 	class ModuleActionListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			Module m = ModuleManager.getSelectedModule(frame.modules);
@@ -211,7 +178,7 @@ public class Launcher {
 			}
 		}
 	}
-	
+	*/
 	class LaunchActionListener implements ActionListener {
 		
 		private boolean isLoggingIn = false;
@@ -245,6 +212,8 @@ public class Launcher {
 			
 			isLoggingIn = true;
 			
+			final RunnableModule module = moduleFromChioceItem.get(frame.gameVersion.getSelectedItem());
+			
 			new Thread() {
 				@Override
 				public void run() {
@@ -253,7 +222,23 @@ public class Launcher {
 							if(succeed) {
 								System.out.println(Lang.getString("msg.auth.succeeded"));
 								Config.updateFromFrame(frame);
-								Runner runner = new Runner(ModuleManager.getSelectedModule(frame.gameVersion), auth);
+								
+								if(!module.isInstalled()) {
+									module.install(frame.installProgress);
+									while(module.isDownloading()) {
+										try {
+											Thread.sleep(100);
+										} catch (InterruptedException e) {
+											e.printStackTrace();
+										}
+									}
+									if(!module.isInstalled()) {
+										JOptionPane.showMessageDialog(frame, Lang.getString("msg.module.failed"));
+										return;
+									}
+								}
+								
+								Runner runner = new Runner(module, auth);
 								if(!runner.prepare()) {
 									isLoggingIn = false;
 									return;
@@ -271,15 +256,6 @@ public class Launcher {
 					});
 				}
 			}.start();
-		}
-	}
-	
-	class ShowInModuleListListener implements ActionListener {
-		public void actionPerformed(ActionEvent e) {
-			Config.showOld = frame.showOld.isSelected();
-			Config.showSnapshot = frame.showSnapshot.isSelected();
-
-			ModuleManager.showModules(frame.modulesModel);
 		}
 	}
 

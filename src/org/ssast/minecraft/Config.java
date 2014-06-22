@@ -152,46 +152,14 @@ public class Config {
 	}
 	
 	public static void updateToFrame(LauncherFrame frame) {
-		frame.profiles.removeAllItems();
-		for(Profile profile : profiles.values()) {
-			frame.profiles.addItem(profile);
-		}
-		frame.profiles.setSelectedItem(currentProfile);
+		currentProfile = profiles.get("(Default)");
 		currentProfile.updateToFrame(frame);
-		frame.jrePath.setText(jrePath);
-		frame.memorySizeSlider.setValue(memory);
-		if(!d32 && !d64)
-			frame.runningModeDefault.setSelected(true);
-		if(d32)
-			frame.runningMode32.setSelected(true);
-		if(d64)
-			frame.runningMode64.setSelected(true);
-		frame.showOld.setSelected(showOld);
-		frame.showSnapshot.setSelected(showSnapshot);
-		frame.memorySize.setText(String.valueOf(memory));
 	}
 
 	public static void updateFromFrame(LauncherFrame frame) {
-		profiles.clear();
-		for(int i=0; i<frame.profiles.getItemCount(); i++) {
-			Profile profile = (Profile)frame.profiles.getItemAt(i);
-			profiles.put(profile.profileName, profile);
-		}
-		currentProfile = (Profile)frame.profiles.getSelectedItem();
 		if(currentProfile == null)
 			currentProfile = profiles.get("(Default)");
 		currentProfile.updateFromFrame(frame);
-		jrePath = frame.jrePath.getText();
-		if(jrePath.equals("")) {
-			jrePath = System.getProperty("java.home");
-		}
-		d64 = frame.runningMode64.isSelected();
-		d32 = frame.runningMode32.isSelected();
-		showOld = frame.showOld.isSelected();
-		showSnapshot = frame.showSnapshot.isSelected();
-		try {
-			memory = Integer.valueOf(frame.memorySize.getText());
-		} catch (Exception e) {	}
 	}
 
 	static {
