@@ -10,10 +10,9 @@ Clone this repository and import it into Eclipse, and then begin your developmen
 <a href="/build/SSASTLauncher.jar">SSASTLauncher.jar</a>
 
 ## Latest Version
-<b>1.6.7</b><br>
-* Read and write launcher_profiles.json when using official login engine<br>
-* If official login failed, you may use stored login session<br>
-* Mix the problem that it spends long time checking updates (it should be mixed at 1.5.2 version)<br>
+<b>1.6.8</b><br>
+* Changed SSAST login: use proper UUID<br>
+* Removed crash report (would open later)<br>
 
 ## Future Version
 No future features planned.

@@ -6,11 +6,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.OutputStream;
 import java.io.PrintStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JOptionPane;
@@ -25,7 +21,6 @@ import org.ssast.minecraft.download.Downloader;
 import org.ssast.minecraft.process.Runner;
 import org.ssast.minecraft.util.EasyFileAccess;
 import org.ssast.minecraft.util.Lang;
-import org.ssast.minecraft.util.URLParam;
 import org.ssast.minecraft.version.Module;
 import org.ssast.minecraft.version.ModuleCallbackAdapter;
 import org.ssast.minecraft.version.ModuleManager;
@@ -34,7 +29,7 @@ import org.ssast.minecraft.version.Version;
 
 public class Launcher {
 
-	private static final String VERSION = "1.6.7";
+	private static final String VERSION = "1.6.8";
 	private static final String helpWords = "SSAST Launcher V" + VERSION + "\n" + Lang.getString("msg.help");
 
 	private LauncherFrame frame = null;
@@ -305,6 +300,7 @@ public class Launcher {
 	}
 
 	public static void exceptionReport(String str) {
+		/*
 		try {
 			HttpURLConnection conn = (HttpURLConnection) new URL("http://disqus.com/api/3.0/posts/create.json").openConnection();
 			conn.setRequestMethod("POST");
@@ -338,6 +334,7 @@ public class Launcher {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		*/
 	}
 
 	public static void main(String[] args) {
