@@ -61,6 +61,7 @@ msg.run.unknownparam1=執行階段錯誤，不存在參數“
 msg.run.unknownparam2=”
 msg.twitch.inputname=請輸入你想要的角色名：
 msg.yggdrasil.saved=無法連接到登入伺服器，是否要使用本地保存的連接信息？
+msg.run.failed=啟動失敗。查閱last.log以了解可能的原因。
 
 ui.mode.default=默認
 

@@ -101,7 +101,7 @@ public class ModuleManager {
 
 		Collections.sort(moduleList, new Comparator<Module>(){
 			public int compare(Module o1, Module o2) {
-				return -o1.getReleaseTime().compareTo(o2.getReleaseTime());
+				return -o1.getTime().compareTo(o2.getTime());
 			}
 		});
 
@@ -111,5 +111,9 @@ public class ModuleManager {
 		for(Module m : modules) {
 			moduleFromName.put(m.getName(), m);
 		}
+	}
+	
+	public static Module getModuleFromName(String name) {
+		return moduleFromName.get(name);
 	}
 }

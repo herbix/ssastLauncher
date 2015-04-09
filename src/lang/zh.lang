@@ -62,6 +62,7 @@ msg.run.unknownparam1=运行时错误，不存在参数“
 msg.run.unknownparam2=”
 msg.twitch.inputname=请输入你想要的角色名：
 msg.yggdrasil.saved=无法连接到登录服务器，是否要使用本地保存的连接信息？
+msg.run.failed=启动失败。阅读last.log来了解可能的原因。
 
 ui.mode.d32=32位
 ui.mode.d64=64位

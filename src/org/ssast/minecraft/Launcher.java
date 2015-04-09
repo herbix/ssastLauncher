@@ -29,7 +29,7 @@ import org.ssast.minecraft.version.Version;
 
 public class Launcher {
 
-	private static final String VERSION = "1.6.8";
+	private static final String VERSION = "1.6.9";
 	private static final String helpWords = "SSAST Launcher V" + VERSION + "\n" + Lang.getString("msg.help");
 
 	private LauncherFrame frame = null;
@@ -254,6 +254,7 @@ public class Launcher {
 									return;
 								}
 								frame.setVisible(false);
+								frame.setStdOut();
 								Config.saveConfig();
 								Downloader.stopAll();
 								runner.start();

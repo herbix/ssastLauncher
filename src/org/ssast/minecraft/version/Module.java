@@ -20,8 +20,10 @@ public abstract class Module {
 	public abstract String getName();
 
 	public abstract boolean isInstalled();
-	
+
 	public abstract String getReleaseTime();
+
+	public abstract String getTime();
 	
 	public abstract String getState();
 	

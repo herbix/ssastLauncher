@@ -340,11 +340,15 @@ public class LauncherFrame extends JFrame {
 	}
 
 	public void setStdOut() {
-		thisStdOut = new PrintStream(new ConsoleOutputStream(), true);
-		oldStdOut = System.out;
-		System.setOut(thisStdOut);
-		if(Config.showDebugInfo) {
-			System.setErr(thisStdOut);
+		if(thisStdOut != null && thisStdOut == System.out) {
+			System.setOut(oldStdOut);
+		} else {
+			thisStdOut = new PrintStream(new ConsoleOutputStream(), true);
+			oldStdOut = System.out;
+			System.setOut(thisStdOut);
+			if(Config.showDebugInfo) {
+				System.setErr(thisStdOut);
+			}
 		}
 	}
 
