@@ -189,15 +189,13 @@ public class RunnableModule extends Module {
 			Module m = ModuleManager.getModuleFromName(info.inheritsFrom);
 			if(m != null && m instanceof RunnableModule) {
 				RunnableModule rm = (RunnableModule)m;
-				boolean cond = !rm.tryLoadModuleInfo() || rm.checkInhert();
-				if(!needDownload) {
-					return cond;
-				}
-				if(cond) {
-					moduleInfo.inhertStack.push(rm);
-					moduleDownloader.addDownload(
-						new Downloadable(rm.getModuleJsonUrl(),
-						new GameDownloadCallback("json-inhert", null)));
+				if(!rm.tryLoadModuleInfo() || rm.checkInhert()) {
+					if(needDownload) {
+						moduleInfo.inhertStack.push(rm);
+						moduleDownloader.addDownload(
+							new Downloadable(rm.getModuleJsonUrl(),
+							new GameDownloadCallback("json-inhert", null)));
+					}
 					return true;
 				} else {
 					info.addInheritedInfo(rm.moduleInfo);
