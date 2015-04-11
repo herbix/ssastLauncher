@@ -13,7 +13,6 @@ Clone this repository and import it into Eclipse, and then begin your developmen
 <b>1.6.9</b><br>
 * Updated launcher updater url<br>
 * Now launcher can read "inheritsFrom" property of a version file<br>
-* Now versions are sorted in "time" not "releaseTime"<br>
 * Added minecraft windows opening check in case of no response<br>
 
 ## Future Version
