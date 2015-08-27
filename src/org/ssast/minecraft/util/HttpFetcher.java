@@ -11,6 +11,7 @@ import java.util.Map;
 import java.net.HttpURLConnection;
 
 import org.json.JSONObject;
+import org.ssast.minecraft.Config;
 
 /**
  * This class contains methods to easy access http contents.
@@ -24,7 +25,11 @@ public final class HttpFetcher {
 			throws 	IOException {
 		HttpURLConnection conn;
 		URL console = new URL(url);
-		conn = (HttpURLConnection) console.openConnection();
+		if(Config.proxy != null) {
+			conn = (HttpURLConnection) console.openConnection(Config.proxy);
+		} else {
+			conn = (HttpURLConnection) console.openConnection();
+		}
 		conn.setRequestMethod(method);
 		if(downloaded > 0) {
 			conn.addRequestProperty("Range", downloaded + "-");

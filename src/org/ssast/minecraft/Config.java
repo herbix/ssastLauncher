@@ -5,6 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.Proxy.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -47,7 +50,7 @@ public class Config {
 		"/versions/%s/%s-natives";
 
 	public static final String TEMP_DIR = new File(new File(System.getProperty("java.io.tmpdir")), "SSASTLauncher").getPath();
-
+	
 	public static Profile currentProfile = null;
 	public static Map<String, Profile> profiles = new HashMap<String, Profile>();
 	public static String jrePath = System.getProperty("java.home");
@@ -61,6 +64,7 @@ public class Config {
 	public static boolean showDebugInfo = false;
 	public static boolean showOld = false;
 	public static boolean showSnapshot = false;
+	public static Proxy proxy = null;
 
 	public static void saveConfig() {
 		Properties p = new Properties();
@@ -81,6 +85,10 @@ public class Config {
 		p.setProperty("show-debug", String.valueOf(showDebugInfo));
 		p.setProperty("show-old", String.valueOf(showOld));
 		p.setProperty("show-snapshot", String.valueOf(showSnapshot));
+		
+		if(proxy != null) {
+			p.setProperty("proxy", getProxyString());
+		}
 		
 		try {
 			FileOutputStream out = new FileOutputStream(CONFIG_FILE);
@@ -144,6 +152,21 @@ public class Config {
 			
 			String current = p.getProperty("current-profile", "(Default)");
 			currentProfile = profiles.get(current);
+
+			try {
+				String proxyString = p.getProperty("proxy", null);
+				int index = proxyString.lastIndexOf(':');
+				String hostName;
+				int port;
+				if(index == -1) {
+					hostName = proxyString;
+					port = 3128;
+				} else {
+					hostName = proxyString.substring(0, index);
+					port = Integer.parseInt(proxyString.substring(index + 1));
+				}
+				proxy = new Proxy(Type.HTTP, new InetSocketAddress(hostName, port));
+			} catch (Exception e) {	}
 			
 			in.close();
 		} catch (IOException e) {
@@ -194,6 +217,11 @@ public class Config {
 		} catch (Exception e) {	}
 	}
 
+	public static String getProxyString() {
+		InetSocketAddress addr = (InetSocketAddress)proxy.address();
+		return addr.getHostName() + ":" + addr.getPort();
+	}
+	
 	static {
 		loadConfig();
 	}

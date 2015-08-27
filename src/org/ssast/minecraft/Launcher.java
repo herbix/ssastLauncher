@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+
 import org.ssast.minecraft.auth.AuthDoneCallback;
 import org.ssast.minecraft.auth.AuthType;
 import org.ssast.minecraft.auth.ServerAuth;
@@ -29,9 +30,13 @@ import org.ssast.minecraft.version.Version;
 
 public class Launcher {
 
-	private static final String VERSION = "1.6.9";
+	private static final String VERSION = "1.6.10";
 	private static final String helpWords = "SSAST Launcher V" + VERSION + "\n" + Lang.getString("msg.help");
 
+	private static Launcher instance;
+	private static Thread shutdownHook;
+
+	private boolean showFrame = true;
 	private LauncherFrame frame = null;
 
 	private Downloader mainDownloader = null;
@@ -58,8 +63,13 @@ public class Launcher {
 	private void initFrame() {
 		frame = new LauncherFrame();
 		Config.updateToFrame(frame);
-		frame.setVisible(true);
 		frame.setStdOut();
+		synchronized (this) {
+			if(!showFrame) {
+				return;
+			}
+			frame.setVisible(true);
+		}
 	}
 
 	private void initMainDownloader() {
@@ -284,6 +294,10 @@ public class Launcher {
 		initFrame();
 		System.out.println(helpWords);
 		
+		if(Config.proxy != null) {
+			System.out.println(Lang.getString("msg.useproxy") + Config.getProxyString());
+		}
+		
 		initMainDownloader();
 		
 		initGameDirs();
@@ -337,6 +351,28 @@ public class Launcher {
 		}
 		*/
 	}
+	
+	public static void removeShutdownHook() {
+		Runtime.getRuntime().removeShutdownHook(shutdownHook);
+	}
+
+	public static void hideFrame() {
+		synchronized (instance) {
+			if(instance.frame != null) {
+				instance.frame.setVisible(false);
+			}
+			instance.showFrame = false;
+		}
+	}
+
+	public static void unhideFrame() {
+		synchronized (instance) {
+			if(instance.frame != null) {
+				instance.frame.setVisible(true);
+			}
+			instance.showFrame = true;
+		}
+	}
 
 	public static void main(String[] args) {
 		try {
@@ -347,7 +383,7 @@ public class Launcher {
 		
 		new Updater().checkUpdate();
 
-		Runtime.getRuntime().addShutdownHook(new Thread(){
+		Runtime.getRuntime().addShutdownHook(shutdownHook = new Thread(){
 			@Override
 			public void run() {
 				EasyFileAccess.deleteFileForce(new File(Config.TEMP_DIR));
@@ -355,7 +391,8 @@ public class Launcher {
 		});
 		
 		try {
-			new Launcher().run();
+			instance = new Launcher();
+			instance.run();
 		} catch (Throwable t) {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			t.printStackTrace(new PrintStream(out));
@@ -365,4 +402,5 @@ public class Launcher {
 			exceptionReport(str);
 		}
 	}
+
 }

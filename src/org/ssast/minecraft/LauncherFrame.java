@@ -342,6 +342,9 @@ public class LauncherFrame extends JFrame {
 	public void setStdOut() {
 		if(thisStdOut != null && thisStdOut == System.out) {
 			System.setOut(oldStdOut);
+			if(Config.showDebugInfo) {
+				System.setErr(oldStdOut);
+			}
 		} else {
 			thisStdOut = new PrintStream(new ConsoleOutputStream(), true);
 			oldStdOut = System.out;

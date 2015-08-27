@@ -61,6 +61,7 @@ msg.run.unknownparam2=".
 msg.twitch.inputname=Please input your player name:
 msg.yggdrasil.saved=Cannot connect to login server. Would you like to use local authentication data as your login sessions?
 msg.run.failed=Launching failed. Please read last.log for more information.
+msg.useproxy=Using proxy:
 
 ui.mode.d32=-d32
 ui.mode.d64=-d64
