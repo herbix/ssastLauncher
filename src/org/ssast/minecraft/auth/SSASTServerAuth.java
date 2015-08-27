@@ -2,6 +2,7 @@ package org.ssast.minecraft.auth;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
 
 import org.ssast.minecraft.util.HttpFetcher;
 import org.ssast.minecraft.util.Lang;
@@ -43,6 +44,7 @@ public class SSASTServerAuth extends ServerAuth {
 		}
 
 		setAccessToken(result.trim());
+		setUuid(UUID.nameUUIDFromBytes(("SSAST:" + getPlayerName()).getBytes()).toString().replace("-", ""));
 		callback.authDone(SSASTServerAuth.this, true);
 	}
 	

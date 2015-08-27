@@ -112,4 +112,8 @@ public class ModuleManager {
 			moduleFromName.put(m.getName(), m);
 		}
 	}
+	
+	public static Module getModuleFromName(String name) {
+		return moduleFromName.get(name);
+	}
 }

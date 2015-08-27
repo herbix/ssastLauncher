@@ -2,6 +2,7 @@ package org.ssast.minecraft.version;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -18,6 +19,8 @@ public class RunnableModuleInfo {
 	public List<Library> libraries;
 	public List<Rule> rules;
 	public String assets;
+	public String inheritsFrom;
+	public Stack<RunnableModule> inhertStack;
 	
 	public RunnableModuleInfo(JSONObject json) {
 		id = json.getString("id");
@@ -28,6 +31,10 @@ public class RunnableModuleInfo {
 		type = json.getString("type");
 		if(json.has("incompatibilityReason"))
 			incompatibilityReason = json.getString("incompatibilityReason");
+		if(json.has("inheritsFrom")) {
+			inheritsFrom = json.getString("inheritsFrom");
+			inhertStack = new Stack<RunnableModule>();
+		}
 
 		JSONArray libs = json.getJSONArray("libraries");
 		libraries = new ArrayList<Library>();
@@ -56,5 +63,9 @@ public class RunnableModuleInfo {
 	
 	public boolean canRunInThisOS() {
 		return Rule.isAllowed(rules);
+	}
+
+	public void addInheritedInfo(RunnableModuleInfo inherted) {
+		this.libraries.addAll(inherted.libraries);
 	}
 }

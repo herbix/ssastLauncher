@@ -1,9 +1,12 @@
 package org.ssast.minecraft.process;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.swing.JOptionPane;
 
 import org.json.JSONObject;
 import org.ssast.minecraft.Config;
@@ -157,19 +162,29 @@ public class Runner {
 			pb.redirectErrorStream(true);
 
 			Process p = pb.start();
+			boolean windowOpened = false;
 
-			if(Config.showDebugInfo) {
-				OutputStream out = new FileOutputStream("last.log");
-				InputStream in = p.getInputStream();
-				byte[] buffer = new byte[65536];
-				int n;
-				
-				out.write(("Running with params : " + params + "\r\n").getBytes());
-				
-				while((n = in.read(buffer)) >= 0) {
-					out.write(buffer, 0, n);
+			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("last.log")));
+			BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			
+			out.write("Running with params : " + params + "\r\n");
+			
+			String line;
+			while((line = in.readLine()) != null) {
+				if(line.toLowerCase().contains("lwjgl version")) {
+					if(!Config.showDebugInfo) {
+						out.close();
+						return;
+					}
+					windowOpened = true;
 				}
-				out.close();
+				out.write(line);
+				System.out.println(line);
+			}
+			out.close();
+			
+			if(!windowOpened) {
+				JOptionPane.showMessageDialog(null, Lang.getString("msg.run.failed"), "SSAST Launcher", JOptionPane.ERROR_MESSAGE);
 			}
 			
 		} catch (Exception e) {

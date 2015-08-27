@@ -3,6 +3,7 @@ package org.ssast.minecraft;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
@@ -19,43 +20,32 @@ public class Updater {
 
 	private static final String UPDATE_URL = "https://raw.githubusercontent.com/herbix/ssastLauncher/concise-version/build/SSASTLauncher.jar";
 
-	private boolean filePropertyGot = false;
-
 	private String currentFile;
 	
 	private String eTag = "";
 	private int size = 0;
 	
-	private boolean getRemoteFileInfo() throws Exception {
-		final byte[] lock = new byte[0];
-		
-		Thread downloadFile = new Thread() {
-			public void run() {
-				URLConnection conn;
-				try {
-					conn = new URL(UPDATE_URL).openConnection();
-					conn.setReadTimeout(500);
-					conn.connect();
-					size = conn.getContentLength();
-					eTag = conn.getHeaderField("ETag");
-					eTag = eTag.substring(1, eTag.length()-1);
-					conn.getInputStream().close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				synchronized (lock) {
-					filePropertyGot = true;
-					lock.notify();
-				}
+	private InputStream getRemoteFileInfo() throws Exception {
+		URLConnection conn;
+		try {
+			conn = new URL(UPDATE_URL).openConnection();
+			if(!eTag.equals("")) {
+				conn.addRequestProperty("If-None-Match", "\"" + eTag + "\"");
 			}
-		};
-		
-		synchronized (lock) {
-			downloadFile.start();
-			lock.wait(500);
+			conn.connect();
+			int code = ((HttpURLConnection)conn).getResponseCode();
+			if(code == 200) {
+				size = conn.getContentLength();
+				eTag = conn.getHeaderField("ETag");
+				eTag = eTag.substring(1, eTag.length()-1);
+				return conn.getInputStream();
+			} else {
+				return null;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
-		return filePropertyGot;
+		return null;
 	}
 
 	private boolean checkSizeEqual() {
@@ -86,6 +76,15 @@ public class Updater {
 	}
 	
 	void checkUpdate() {
+		new Thread() {
+			@Override
+			public void run() {
+				checkUpdate0();
+			}
+		}.start();
+	}
+	
+	void checkUpdate0() {
 
 		if(Config.dontUpdateUntil > new Date().getTime()) {
 			return;
@@ -104,7 +103,8 @@ public class Updater {
 			currentFile = currentFile.substring(4 + 5);
 			currentFile = currentFile.substring(0, currentFile.lastIndexOf('!'));
 
-			if(!getRemoteFileInfo())
+			InputStream in = getRemoteFileInfo();
+			if(in == null)
 				return;
 
 			if(Config.currentETag.equals(""))
@@ -115,26 +115,24 @@ public class Updater {
 
 			if(eTag.equals(Config.currentETag))
 				return;
-			
-			if(!extractUpdater())
-				return;
 
 			int selection = JOptionPane.showConfirmDialog(null, Lang.getString("msg.update.request"), "SSAST Launcher", JOptionPane.YES_NO_OPTION);
 			if(selection != JOptionPane.YES_OPTION) {
 				Config.dontUpdateUntil = new Date().getTime() + 7 * 24 * 60 * 60 * 1000;
 				eTag = Config.currentETag;
+				in.close();
 				return;
 			}
 			
-			UpdateDialog dialog = null;
+			Launcher.hideFrame();
+			
+			UpdateDialog dialog = new UpdateDialog();
+			dialog.setVisible(true);
 			
 			try {
-				URLConnection conn = new URL(UPDATE_URL).openConnection();
-				conn.setReadTimeout(500);
-				InputStream in = conn.getInputStream();
-				dialog = new UpdateDialog();
-				dialog.setVisible(true);
-				
+				if(!extractUpdater())
+					throw new Exception("Cannot extract updater.");
+
 				File tempFile = new File(new File(Config.TEMP_DIR), "SSASTLauncher.jar");
 				FileOutputStream out = new FileOutputStream(tempFile);
 				
@@ -173,6 +171,8 @@ public class Updater {
 				
 				ProcessBuilder pb = new ProcessBuilder(java, "-cp", Config.TEMP_DIR, "org.ssast.minecraft.UpdaterLater", 
 						tempFile.getAbsolutePath(), currentFile);
+
+				Launcher.removeShutdownHook();
 				
 				pb.start();
 				System.exit(0);
@@ -183,6 +183,7 @@ public class Updater {
 				if(dialog != null) {
 					dialog.setVisible(false);
 				}
+				Launcher.unhideFrame();
 			}
 		
 		} catch (Exception e) {

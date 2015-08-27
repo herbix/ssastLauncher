@@ -63,7 +63,9 @@ public class RunnableModule extends Module {
 				new Downloadable(getModuleJsonUrl(),
 				new GameDownloadCallback("json", null)));
 		} else {
-			checkModuleAssets();
+			if(!checkInhert(moduleInfo, true)) {
+				checkModuleAssets();
+			}
 		}
 		
 		if(progress != null) {
@@ -91,6 +93,8 @@ public class RunnableModule extends Module {
 			if(succeed) {
 				if(type.equals("json")) {
 					downloadDoneJson(d, succeed, queueEmpty);
+				} else if(type.equals("json-inhert")) {
+					downloadDoneJsonInhert(d, succeed, queueEmpty);
 				} else if(type.equals("bin")) {
 					downloadDoneBin(d, succeed, queueEmpty);
 				} else if(type.equals("sha")) {
@@ -104,8 +108,8 @@ public class RunnableModule extends Module {
 				System.out.println(Lang.getString("msg.module.failed") + "[" + getName() + "]");
 			}
 		}
-		
-		public void downloadDoneJson(Downloadable d, boolean succeed, boolean queueEmpty) {
+
+		private void downloadDoneJson(Downloadable d, boolean succeed, boolean queueEmpty) {
 			JSONObject json = new JSONObject(d.getDownloaded());
 			moduleInfo = new RunnableModuleInfo(json);
 
@@ -119,11 +123,37 @@ public class RunnableModule extends Module {
 
 			new File(getModuleJsonPath()).getParentFile().mkdirs();
 			EasyFileAccess.saveFile(getModuleJsonPath(), d.getDownloaded());
-			
+
+			if(checkInhert(moduleInfo, true)) {
+				return;
+			}
 			checkModuleAssets();
 		}
 		
-		public void downloadDoneBin(Downloadable d, boolean succeed, boolean queueEmpty) {
+		private void downloadDoneJsonInhert(Downloadable d, boolean succeed, boolean queueEmpty) {
+			JSONObject json = new JSONObject(d.getDownloaded());
+			RunnableModule currentModule = moduleInfo.inhertStack.peek();
+			currentModule.moduleInfo = new RunnableModuleInfo(json);
+			new File(currentModule.getModuleJsonPath()).getParentFile().mkdirs();
+			EasyFileAccess.saveFile(currentModule.getModuleJsonPath(), d.getDownloaded());
+
+			if(checkInhert(currentModule.moduleInfo, true)) {
+				return;
+			}
+
+			moduleInfo.inhertStack.pop();
+			RunnableModule stackModule = currentModule;
+			while(!moduleInfo.inhertStack.empty()) {
+				RunnableModule t = moduleInfo.inhertStack.pop();
+				t.moduleInfo.addInheritedInfo(stackModule.moduleInfo);
+				stackModule = t;
+			}
+			moduleInfo.addInheritedInfo(stackModule.moduleInfo);
+
+			checkModuleAssets();
+		}
+		
+		private void downloadDoneBin(Downloadable d, boolean succeed, boolean queueEmpty) {
 			File file = new File(d.getSavedFile());
 			File fileReal;
 			
@@ -141,7 +171,7 @@ public class RunnableModule extends Module {
 			}
 		}
 		
-		public void downloadDoneSha(Downloadable d, boolean succeed, boolean queueEmpty) {
+		private void downloadDoneSha(Downloadable d, boolean succeed, boolean queueEmpty) {
 			File file = new File(d.getSavedFile());
 			File fileReal;
 			
@@ -166,7 +196,32 @@ public class RunnableModule extends Module {
 		EasyZipAccess.extractZip(fileReal.getPath(), 
 			lib.getExtractTempPath() + "/", extractBase, excludes, "");
 	}
+	
+	public boolean checkInhert() {
+		return checkInhert(moduleInfo, false);
+	}
 
+	private boolean checkInhert(RunnableModuleInfo info, boolean needDownload) {
+		if(info.inheritsFrom != null) {
+			Module m = ModuleManager.getModuleFromName(info.inheritsFrom);
+			if(m != null && m instanceof RunnableModule) {
+				RunnableModule rm = (RunnableModule)m;
+				if(!rm.tryLoadModuleInfo() || rm.checkInhert()) {
+					if(needDownload) {
+						moduleInfo.inhertStack.push(rm);
+						moduleDownloader.addDownload(
+							new Downloadable(rm.getModuleJsonUrl(),
+							new GameDownloadCallback("json-inhert", null)));
+					}
+					return true;
+				} else {
+					info.addInheritedInfo(rm.moduleInfo);
+				}
+			}
+		}
+		return false;
+	}
+	
 	private void checkModuleAssets() {
 		if(!tryLoadModuleAssets()) {
 			moduleDownloader.addDownload(
@@ -384,6 +439,11 @@ public class RunnableModule extends Module {
 				installState = 0;
 				return false;
 			}
+			
+			if(checkInhert()) {
+				installState = 0;
+				return false;	
+			}
 
 			try {
 				
@@ -474,6 +534,14 @@ public class RunnableModule extends Module {
 		}
 
 		return extractTarget.replace('/', System.getProperty("file.separator").charAt(0));
+	}
+	
+	public String getTime() {
+		if(version.time != null)
+			return version.time;
+		if(tryLoadModuleInfo())
+			return moduleInfo.time;
+		return " ";
 	}
 
 	public String getReleaseTime() {
@@ -608,4 +676,5 @@ public class RunnableModule extends Module {
 		}
 		return true;
 	}
+
 }
