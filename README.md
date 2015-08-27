@@ -1,5 +1,4 @@
-SSAST Minecraft Launcher Concise
-=============
+# SSAST Minecraft Launcher Concise
 
 ## Introduction
 SSAST Minecraft Launcher is an unofficial minecraft game launcher. Main features of the launcher is the same as the official launcher, including managing game versions, player profiles and launching minecraft. The launcher supports unofficial login engine such as <a href="http://skinme.cc">SkinMe</a>, <del>MineLogin</del>, and <a href="http://minecraft.ssast.org">SSAST</a>. SSAST Launcher also supports <a href="http://files.minecraftforge.net/">Minecraft Forge</a> game versions.

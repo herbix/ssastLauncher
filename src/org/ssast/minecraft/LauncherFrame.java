@@ -45,6 +45,7 @@ public class LauncherFrame extends JFrame {
 	JComboBox gameVersion = new JComboBox();
 	JButton launch = new JButton(Lang.getString("ui.launch"));
 	JProgressBar installProgress = new JProgressBar();
+	JLabel commentLabel = new JLabel("aaaa");
 
 	PrintStream thisStdOut = null;
 	PrintStream oldStdOut = null;
@@ -134,6 +135,10 @@ public class LauncherFrame extends JFrame {
 		base.add(launch);
 		launch.setLocation(205, 245);
 		launch.setSize(190, 38);
+		
+		base.add(commentLabel);
+		commentLabel.setLocation(0, 360);
+		commentLabel.setSize(600, 20);
 		
 		base.add(installProgress);
 		installProgress.setLocation(0, 380);

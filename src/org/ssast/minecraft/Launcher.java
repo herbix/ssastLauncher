@@ -4,7 +4,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JComboBox;
@@ -31,7 +34,7 @@ import org.ssast.minecraft.version.Version;
 public class Launcher {
 
 	private static final String VERSION = "1.6.10";
-	private static final String helpWords = "SSAST Launcher V" + VERSION + "\n" + Lang.getString("msg.help");
+	private static final String helpWords = "SSAST Launcher V" + VERSION + " " + Lang.getString("msg.help");
 
 	private static Launcher instance;
 	private static Thread shutdownHook;
@@ -62,9 +65,23 @@ public class Launcher {
 		}
 	};
 	
+	@SuppressWarnings("resource")
 	private void initFrame() {
 		frame = new LauncherFrame();
 		Config.updateToFrame(frame);
+		System.setOut(new PrintStream(new OutputStream() {
+			private ByteArrayOutputStream buf = new ByteArrayOutputStream();
+			@Override
+			public void write(int b) throws IOException {
+				if(b == '\n') {
+					frame.commentLabel.setText(new String(buf.toByteArray()));
+					buf.reset();
+				} else {
+					buf.write(b);
+				}
+				System.err.write(b);
+			}
+		}));
 		synchronized (this) {
 			if(!showFrame) {
 				return;
@@ -249,7 +266,6 @@ public class Launcher {
 									return;
 								}
 								frame.setVisible(false);
-								frame.setStdOut();
 								Config.saveConfig();
 								Downloader.stopAll();
 								runner.start();
