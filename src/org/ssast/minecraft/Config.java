@@ -69,6 +69,8 @@ public class Config {
 	public static String proxyType = "HTTP";
 
 	private static String proxyString;
+	public static String proxyHost;
+	public static int proxyPort;
 
 	public static void saveConfig() {
 		Properties p = new Properties();
@@ -230,21 +232,19 @@ public class Config {
 	public static void setProxyString(String str) {
 		proxyString = str;
 		int index = proxyString.lastIndexOf(':');
-		String hostName;
-		int port;
 		if(index == -1) {
-			hostName = proxyString;
-			port = 3128;
+			proxyHost = proxyString;
+			proxyPort = 3128;
 		} else {
-			hostName = proxyString.substring(0, index);
-			port = Integer.parseInt(proxyString.substring(index + 1));
+			proxyHost = proxyString.substring(0, index);
+			proxyPort = Integer.parseInt(proxyString.substring(index + 1));
 		}
-		proxy = new Proxy(getProxyType(), new InetSocketAddress(hostName, port));
+		proxy = new Proxy(getProxyType(), new InetSocketAddress(proxyHost, proxyPort));
 	}
 	
 	private static Type getProxyType() {
-		Type result = Type.HTTP;
-		if(proxyType.equals("Direct")) result = Type.DIRECT;
+		Type result = Type.DIRECT;
+		if(proxyType.equals("HTTP")) result = Type.HTTP;
 		else if(proxyType.equals("Socks")) result = Type.SOCKS;
 		return result;
 	}

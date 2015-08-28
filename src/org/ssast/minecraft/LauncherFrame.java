@@ -99,7 +99,7 @@ public class LauncherFrame extends JFrame {
 	JLabel proxyTypeLabel = new JLabel(Lang.getString("ui.proxy.type.label"));
 	JLabel proxyHostPortLabel = new JLabel(Lang.getString("ui.proxy.hostport.label"));
 	JCheckBox enableProxy = new JCheckBox(Lang.getString("ui.proxy.enable.label"));
-	JComboBox proxyType = new JComboBox(new Object[]{"Direct", "HTTP", "Socks"});
+	JComboBox proxyType = new JComboBox(new Object[]{"HTTP", "Socks"});
 	JTextField proxy = new JTextField();
 	
 	JButton profileSetting = new JButton(Lang.getString("ui.tab.profile"));

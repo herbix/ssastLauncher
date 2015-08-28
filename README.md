@@ -13,6 +13,7 @@ Clone this repository and import it into Eclipse, and then begin your developmen
 <b>1.7.0</b><br>
 * Simplified UI<br>
 * Bug report enabled<br>
+* Proxy is used in Minecraft<br>
 
 ## Future Version
 No future features planned.

@@ -112,6 +112,17 @@ public class Runner {
 			return false;
 		}
 		
+		if(Config.enableProxy && Config.proxy != null) {
+			if(Config.proxyType.equals("Socks")) {
+				params.add("--proxyHost");
+				params.add(Config.proxyHost);
+				params.add("--proxyPort");
+				params.add(String.valueOf(Config.proxyPort));
+			} else {
+				JOptionPane.showMessageDialog(null, Lang.getString("msg.proxy.notsocks"), "SSAST Launcher", JOptionPane.WARNING_MESSAGE);
+			}
+		}
+		
 		if(module.isAssetsVirtual() && !module.copyAssetsToVirtual()) {
 			System.out.println(Lang.getString("msg.assets.cannotload"));
 			return false;
