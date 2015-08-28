@@ -189,7 +189,7 @@ public class Runner {
 					}
 					windowOpened = true;
 				}
-				out.write(line);
+				out.write(line + "\n");
 				System.out.println(line);
 			}
 			out.close();
