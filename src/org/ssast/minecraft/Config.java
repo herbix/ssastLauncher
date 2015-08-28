@@ -64,7 +64,11 @@ public class Config {
 	public static boolean showDebugInfo = false;
 	public static boolean showOld = false;
 	public static boolean showSnapshot = false;
+	public static boolean enableProxy = false;
 	public static Proxy proxy = null;
+	public static String proxyType = "HTTP";
+
+	private static String proxyString;
 
 	public static void saveConfig() {
 		Properties p = new Properties();
@@ -86,9 +90,9 @@ public class Config {
 		p.setProperty("show-old", String.valueOf(showOld));
 		p.setProperty("show-snapshot", String.valueOf(showSnapshot));
 		
-		if(proxy != null) {
-			p.setProperty("proxy", getProxyString());
-		}
+		p.setProperty("proxy", getProxyString());
+		p.setProperty("proxy-enabled", String.valueOf(enableProxy));
+		p.setProperty("proxy-type", proxyType);
 		
 		try {
 			FileOutputStream out = new FileOutputStream(CONFIG_FILE);
@@ -154,19 +158,12 @@ public class Config {
 			currentProfile = profiles.get(current);
 
 			try {
-				String proxyString = p.getProperty("proxy", null);
-				int index = proxyString.lastIndexOf(':');
-				String hostName;
-				int port;
-				if(index == -1) {
-					hostName = proxyString;
-					port = 3128;
-				} else {
-					hostName = proxyString.substring(0, index);
-					port = Integer.parseInt(proxyString.substring(index + 1));
-				}
-				proxy = new Proxy(Type.HTTP, new InetSocketAddress(hostName, port));
+				setProxyString(p.getProperty("proxy", null));
 			} catch (Exception e) {	}
+			try {
+				enableProxy = Boolean.valueOf(p.getProperty("proxy-enabled", "false"));
+			} catch (Exception e) {	}
+			proxyType = p.getProperty("proxy-type", "HTTP");
 			
 			in.close();
 		} catch (IOException e) {
@@ -192,6 +189,9 @@ public class Config {
 		frame.showOld.setSelected(showOld);
 		frame.showSnapshot.setSelected(showSnapshot);
 		frame.memorySize.setText(String.valueOf(memory));
+		frame.proxy.setText(getProxyString());
+		frame.proxyType.setSelectedItem(proxyType);
+		frame.enableProxy.setSelected(enableProxy);
 	}
 
 	public static void updateFromFrame(LauncherFrame frame) {
@@ -215,13 +215,40 @@ public class Config {
 		try {
 			memory = Integer.valueOf(frame.memorySize.getText());
 		} catch (Exception e) {	}
+		enableProxy = frame.enableProxy.isSelected();
+		proxyType = frame.proxyType.getSelectedItem().toString();
+		try {
+			setProxyString(frame.proxy.getText());
+		} catch (Exception e) {	}
+		
 	}
 
 	public static String getProxyString() {
-		InetSocketAddress addr = (InetSocketAddress)proxy.address();
-		return addr.getHostName() + ":" + addr.getPort();
+		return proxyString;
 	}
 	
+	public static void setProxyString(String str) {
+		proxyString = str;
+		int index = proxyString.lastIndexOf(':');
+		String hostName;
+		int port;
+		if(index == -1) {
+			hostName = proxyString;
+			port = 3128;
+		} else {
+			hostName = proxyString.substring(0, index);
+			port = Integer.parseInt(proxyString.substring(index + 1));
+		}
+		proxy = new Proxy(getProxyType(), new InetSocketAddress(hostName, port));
+	}
+	
+	private static Type getProxyType() {
+		Type result = Type.HTTP;
+		if(proxyType.equals("Direct")) result = Type.DIRECT;
+		else if(proxyType.equals("Socks")) result = Type.SOCKS;
+		return result;
+	}
+
 	static {
 		loadConfig();
 	}

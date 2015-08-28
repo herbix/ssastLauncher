@@ -3,6 +3,7 @@ package org.ssast.minecraft;
 import java.io.IOException;
 
 import org.ssast.minecraft.auth.AuthType;
+import org.ssast.minecraft.util.Lang;
 
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
@@ -64,6 +65,15 @@ public class Profile {
 		frame.authType.setSelectedItem(AuthType.valueOf(authType));
 		frame.gameVersion.setSelectedItem(version);
 		frame.runPath.setText(runPath);
+		frame.profileDetailLabel.setText(getDetailString());
+	}
+
+	public String getDetailString() {
+		return "<html><body><p>" +
+				Lang.getString("ui.username.label") + "<br/>" + user + "</p><p>" +
+				Lang.getString("ui.auth.type.label") + " " + AuthType.valueOf(authType).toString() + "</p><p>" +
+				Lang.getString("ui.version.label") + " " + version + "</p>" +
+				"</body></html>";
 	}
 	
 	public void updateFromFrame(LauncherFrame frame) {

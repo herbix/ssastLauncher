@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JProgressBar;
+
 import org.json.JSONObject;
 import org.ssast.minecraft.Config;
 import org.ssast.minecraft.Launcher;
@@ -25,11 +27,17 @@ public class RunnableModule extends Module {
 	private RunnableModuleInfo moduleInfo = null;
 	private RunnableModuleAssets moduleAssets = null;
 	
+	private JProgressBar progress;
+	
 	public RunnableModule(ModuleInstallCallback icallback,	ModuleUninstallCallback ucallback) {
 		super(icallback, ucallback);
 	}
-
+	
 	public void install() {
+		install(null);
+	}
+
+	public void install(JProgressBar progress) {
 		if(isUninstalling) {
 			System.out.println(Lang.getString("msg.module.isuninstalling"));
 			return;
@@ -60,6 +68,12 @@ public class RunnableModule extends Module {
 			}
 		}
 		
+		if(progress != null) {
+			this.progress = progress;
+			progress.setValue(0);
+			progress.setMaximum(moduleDownloader.downloadCount() * 100);
+		}
+		
 		moduleDownloader.stopAfterAllDone();
 		moduleDownloader.start();
 	}
@@ -87,6 +101,9 @@ public class RunnableModule extends Module {
 					downloadDoneSha(d, succeed, queueEmpty);
 				}
 			} else {
+				if(progress != null) {
+					progress.setValue(0);
+				}
 				moduleDownloader.forceStop();
 				System.out.println(Lang.getString("msg.module.failed") + "[" + getName() + "]");
 			}
@@ -278,6 +295,11 @@ public class RunnableModule extends Module {
 					finishInstall();
 				}
 			}.start();
+		}
+
+		if(progress != null) {
+			progress.setValue(0);
+			progress.setMaximum(moduleDownloader.downloadCount() * 100);
 		}
 	}
 
@@ -656,3 +678,4 @@ public class RunnableModule extends Module {
 	}
 
 }
+

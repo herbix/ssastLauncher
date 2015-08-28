@@ -112,3 +112,12 @@ ui.auth.type.minecraft=Official(Legacy)
 ui.auth.type.minelogin=MineLogin
 ui.auth.type.yggdrasil=Official
 ui.auth.type.twitch=Twitch
+
+ui.tab.profile=Profile Manage
+ui.tab.module=Module Manage
+ui.tab.system=System Settings
+
+ui.proxy.type.label=Proxy Type:
+ui.proxy.hostport.label=Proxy Server (Host:Port)
+ui.proxy.enable.label=Enable Proxy
+

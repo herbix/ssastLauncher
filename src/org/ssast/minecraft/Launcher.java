@@ -7,9 +7,12 @@ import java.awt.event.ItemListener;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
+import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JButton;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
@@ -21,17 +24,20 @@ import org.ssast.minecraft.download.Downloadable;
 import org.ssast.minecraft.download.Downloader;
 import org.ssast.minecraft.process.Runner;
 import org.ssast.minecraft.util.EasyFileAccess;
+import org.ssast.minecraft.util.HttpFetcher;
 import org.ssast.minecraft.util.Lang;
 import org.ssast.minecraft.version.Module;
 import org.ssast.minecraft.version.ModuleCallbackAdapter;
 import org.ssast.minecraft.version.ModuleManager;
+import org.ssast.minecraft.version.RunnableModule;
 import org.ssast.minecraft.version.VersionManager;
 import org.ssast.minecraft.version.Version;
 
 public class Launcher {
 
-	private static final String VERSION = "1.6.10";
-	private static final String helpWords = "SSAST Launcher V" + VERSION + "\n" + Lang.getString("msg.help");
+	public static final String VERSION = "1.7.0";
+	
+	private static final String helpWords = "SSAST Launcher V" + VERSION + " " + Lang.getString("msg.help");
 
 	private static Launcher instance;
 	private static Thread shutdownHook;
@@ -64,6 +70,7 @@ public class Launcher {
 		frame = new LauncherFrame();
 		Config.updateToFrame(frame);
 		frame.setStdOut();
+		selectSetting(frame.profileSetting);
 		synchronized (this) {
 			if(!showFrame) {
 				return;
@@ -143,6 +150,12 @@ public class Launcher {
 			}
 		}
 	}
+	
+	private void initListenersFirst() {
+		frame.profileSetting.addActionListener(new SelectTabListener());
+		frame.moduleSetting.addActionListener(new SelectTabListener());
+		frame.systemSetting.addActionListener(new SelectTabListener());
+	}
 
 	private void initListeners() {
 		frame.installModules.addActionListener(new ModuleActionListener());
@@ -199,6 +212,13 @@ public class Launcher {
 		frame.showSnapshot.addActionListener(new ShowInModuleListListener());
 	}
 
+	class SelectTabListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			selectSetting((JButton)e.getSource());
+		}
+	}
+
 	class ModuleActionListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			Module m = ModuleManager.getSelectedModule(frame.modules);
@@ -207,10 +227,12 @@ public class Launcher {
 				return;
 			}
 			if(e.getSource() == frame.installModules) {
-				if(m.isInstalled())
+				if(m.isInstalled()) {
 					System.out.println(Lang.getString("msg.module.alreadyinstalled"));
-				else
-					m.install();
+				} else {
+					Config.updateFromFrame(frame);
+					((RunnableModule)m).install(frame.progress);
+				}
 			} else {
 				m.uninstall();
 			}
@@ -298,6 +320,8 @@ public class Launcher {
 			System.out.println(Lang.getString("msg.useproxy") + Config.getProxyString());
 		}
 		
+		initListenersFirst();
+		
 		initMainDownloader();
 		
 		initGameDirs();
@@ -305,6 +329,29 @@ public class Launcher {
 		initGameComponentsList();
 
 		initListeners();
+	}
+
+	public void selectSetting(JButton source) {
+		JPanel targetPanel = null;
+		if(source == frame.profileSetting) {
+			targetPanel = frame.profilePanel;
+		} else if(source == frame.moduleSetting) {
+			targetPanel = frame.modulePanel;
+		} else if(source == frame.systemSetting) {
+			targetPanel = frame.systemPanel;
+		} else {
+			return;
+		}
+		if(!targetPanel.isVisible()) {
+			frame.profileSetting.setSelected(false);
+			frame.moduleSetting.setSelected(false);
+			frame.systemSetting.setSelected(false);
+			frame.profilePanel.setVisible(false);
+			frame.modulePanel.setVisible(false);
+			frame.systemPanel.setVisible(false);
+			targetPanel.setVisible(true);
+			source.setSelected(true);
+		}
 	}
 
 	public static void exceptionReport(Throwable t) {
@@ -315,41 +362,10 @@ public class Launcher {
 	}
 
 	public static void exceptionReport(String str) {
-		/*
-		try {
-			HttpURLConnection conn = (HttpURLConnection) new URL("http://disqus.com/api/3.0/posts/create.json").openConnection();
-			conn.setRequestMethod("POST");
-			conn.setUseCaches(false);
-			conn.setReadTimeout(500);
-			
-			Map<String, String> params = new HashMap<String, String>();
-			
-			params.put("thread", "2708772165");
-			params.put("message", "Version " + VERSION + ":\n" + str);
-			params.put("api_key", "E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F");
-			params.put("author_name", "Exception Report");
-			params.put("author_email", "herbix@163.com");
-			
-			String paramStr = URLParam.mapToParamString(params);
-
-			byte[] toSend = paramStr.getBytes("UTF-8");
-
-			conn.addRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-			conn.addRequestProperty("Content-Length", String.valueOf(toSend.length));
-			conn.setDoOutput(true);
-			conn.connect();
-
-			OutputStream os = conn.getOutputStream();
-			os.write(toSend);
-			os.flush();
-			os.close();
-			
-			conn.getResponseCode();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		*/
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("version", VERSION);
+		params.put("message", str);
+		HttpFetcher.fetchUsePostMethod("http://bugreport.herbix.me/ssastLauncher.php", params);
 	}
 	
 	public static void removeShutdownHook() {

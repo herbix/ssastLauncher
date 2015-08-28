@@ -114,3 +114,11 @@ ui.auth.type.minecraft=正版（旧）
 ui.auth.type.minelogin=MineLogin
 ui.auth.type.yggdrasil=正版
 ui.auth.type.twitch=Twitch
+
+ui.tab.profile=登录管理
+ui.tab.module=组件管理
+ui.tab.system=系统设置
+
+ui.proxy.type.label=代理类型：
+ui.proxy.hostport.label=代理服务器地址（主机名:端口）
+ui.proxy.enable.label=启用代理

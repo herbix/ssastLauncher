@@ -49,4 +49,9 @@ public class Downloader extends Thread {
 	public static void stopAll() {
 		downloadStop = true;
 	}
+	
+	public int downloadCount() {
+		return downloading.size();
+	}
 }
+

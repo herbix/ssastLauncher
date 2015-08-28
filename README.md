@@ -10,9 +10,9 @@ Clone this repository and import it into Eclipse, and then begin your developmen
 <a href="/build/SSASTLauncher.jar">SSASTLauncher.jar</a>
 
 ## Latest Version
-<b>1.6.10</b><br>
-* Now supports proxy<br>
-* Changed update check<br>
+<b>1.7.0</b><br>
+* Simplified UI<br>
+* Bug report enabled<br>
 
 ## Future Version
 No future features planned.

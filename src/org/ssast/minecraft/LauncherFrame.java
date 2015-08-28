@@ -1,6 +1,5 @@
 package org.ssast.minecraft;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -29,16 +28,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -46,6 +42,7 @@ import javax.swing.table.DefaultTableModel;
 
 import org.ssast.minecraft.auth.AuthType;
 import org.ssast.minecraft.download.Downloader;
+import org.ssast.minecraft.util.HttpFetcher;
 import org.ssast.minecraft.util.Lang;
 
 public class LauncherFrame extends JFrame {
@@ -53,13 +50,6 @@ public class LauncherFrame extends JFrame {
 	private static final long serialVersionUID = -1923022699772187651L;
 
 	JPanel base = new JPanel();
-
-	JSeparator hseparator = new JSeparator();
-	JSeparator hseparator2 = new JSeparator();
-	JSeparator vseparator = new JSeparator();
-
-	JTextArea console = new JTextArea();
-	JScrollPane consoleOuter = new JScrollPane(console);
 
 	JLabel modulesLabel = new JLabel(Lang.getString("ui.module.label"));
 	DefaultTableModel modulesModel = new UneditableTableModel();
@@ -83,6 +73,8 @@ public class LauncherFrame extends JFrame {
 
 	JLabel profilesLabel = new JLabel(Lang.getString("ui.profile.label"));
 	JComboBox profiles = new JComboBox();
+	JLabel profileDetailLabel = new JLabel();
+
 	JButton addProfile = new JButton(Lang.getString("ui.profile.add"));
 	JButton removeProfile = new JButton(Lang.getString("ui.profile.remove"));
 
@@ -101,8 +93,26 @@ public class LauncherFrame extends JFrame {
 	JTextField memorySize = new JTextField();
 	JSlider memorySizeSlider = new JSlider();
 	
+	JLabel commentLabel = new JLabel();
+	JProgressBar progress = new JProgressBar();
+	
+	JLabel proxyTypeLabel = new JLabel(Lang.getString("ui.proxy.type.label"));
+	JLabel proxyHostPortLabel = new JLabel(Lang.getString("ui.proxy.hostport.label"));
+	JCheckBox enableProxy = new JCheckBox(Lang.getString("ui.proxy.enable.label"));
+	JComboBox proxyType = new JComboBox(new Object[]{"Direct", "HTTP", "Socks"});
+	JTextField proxy = new JTextField();
+	
+	JButton profileSetting = new JButton(Lang.getString("ui.tab.profile"));
+	JButton moduleSetting = new JButton(Lang.getString("ui.tab.module"));
+	JButton systemSetting = new JButton(Lang.getString("ui.tab.system"));
+	JPanel profilePanel = new JPanel();
+	JPanel modulePanel = new JPanel();
+	JPanel systemPanel = new JPanel();
+	
 	PrintStream thisStdOut = null;
 	PrintStream oldStdOut = null;
+
+	private PrintStream oldStdErr;
 	
 	public LauncherFrame() {
 		addWindowListener(new WindowAdapter(){
@@ -123,9 +133,9 @@ public class LauncherFrame extends JFrame {
 		});
 
 		setResizable(false);
-		setTitle("SSAST Minecraft Launcher");
+		setTitle("SSAST Minecraft Launcher V" + Launcher.VERSION + " (Made by herbix)");
 		setIconImage(new ImageIcon(getClass().getResource("/favicon.png")).getImage());
-		base.setPreferredSize(new Dimension(600, 450));
+		base.setPreferredSize(new Dimension(600, 400));
 		add(base);
 		pack();
 		setLocationByPlatform(true);
@@ -140,74 +150,87 @@ public class LauncherFrame extends JFrame {
 	}
 	
 	private void createFrame() {
-		base.add(consoleOuter);
-		consoleOuter.setLocation(0, 350);
-		consoleOuter.setSize(600, 100);
-		consoleOuter.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		console.setEditable(false);
-		console.setBackground(Color.white);
-		console.setLineWrap(true);
-		console.setWrapStyleWord(true);
 
-		base.add(modulesLabel);
-		modulesLabel.setLocation(5, 0);
-		modulesLabel.setSize(300, 20);
-		
-		base.add(modulesOuter);
-		modulesOuter.setLocation(0, 20);
-		modulesOuter.setSize(395, 200);
-		modulesModel.addColumn(Lang.getString("ui.table.name"));
-		modulesModel.addColumn(Lang.getString("ui.table.type"));
-		modulesModel.addColumn(Lang.getString("ui.table.state"));
-		modules.getTableHeader().getColumnModel().getColumn(0).setPreferredWidth(125);
-		modules.getTableHeader().getColumnModel().getColumn(1).setPreferredWidth(75);
-		modules.getTableHeader().getColumnModel().getColumn(2).setPreferredWidth(75);
-		modules.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		
-		base.add(hseparator);
-		hseparator.setLocation(1, 344);
-		hseparator.setSize(598, 2);
+		base.add(commentLabel);
+		commentLabel.setLocation(0, 360);
+		commentLabel.setSize(600, 20);
 
-		base.add(hseparator2);
-		hseparator2.setLocation(1, 260);
-		hseparator2.setSize(398, 2);
-		
-		base.add(vseparator);
-		vseparator.setOrientation(SwingConstants.VERTICAL);
-		vseparator.setLocation(400, 1);
-		vseparator.setSize(2, 342);
-		
-		base.add(installModules);
-		installModules.setLocation(5, 225);
-		installModules.setSize(90, 30);
-		
-		base.add(uninstallModules);
-		uninstallModules.setLocation(100, 225);
-		uninstallModules.setSize(90, 30);
-		
-		base.add(showOld);
-		showOld.setLocation(195, 227);
-		showOld.setSize(100, 25);
+		base.add(progress);
+		progress.setLocation(0, 380);
+		progress.setSize(600, 20);
+		HttpFetcher.setJProgressBar(progress);
 
-		base.add(showSnapshot);
-		showSnapshot.setLocation(295, 227);
-		showSnapshot.setSize(100, 25);
+		base.add(profileSetting);
+		profileSetting.setLocation(440, 10);
+		profileSetting.setSize(150, 40);
+
+		base.add(moduleSetting);
+		moduleSetting.setLocation(440, 60);
+		moduleSetting.setSize(150, 40);
+
+		base.add(systemSetting);
+		systemSetting.setLocation(440, 110);
+		systemSetting.setSize(150, 40);
+
+		base.add(launch);
+		launch.setLocation(440, 320);
+		launch.setSize(150, 40);
 		
-		base.add(userLabel);
-		userLabel.setLocation(405, 68);
+		base.add(profilesLabel);
+		profilesLabel.setLocation(440, 155);
+		profilesLabel.setSize(65, 20);
+		
+		base.add(profiles);
+		profiles.setLocation(440, 180);
+		profiles.setSize(150, 23);
+		
+		base.add(profileDetailLabel);
+		profileDetailLabel.setLocation(440, 210);
+		profileDetailLabel.setSize(150, 100);
+
+		//================ profile panel ====================
+		
+		base.add(profilePanel);
+		profilePanel.setLocation(0, 12);
+		profilePanel.setSize(430, 325);
+		profilePanel.setLayout(null);
+		profilePanel.setVisible(false);
+		
+		JLabel profilesLabel2 = new JLabel(Lang.getString("ui.profile.label"));
+		JComboBox profiles2 = new JComboBox();
+		
+		profilePanel.add(profilesLabel2);
+		profilesLabel2.setLocation(110, 10);
+		profilesLabel2.setSize(65, 20);
+
+		profilePanel.add(profiles2);
+		profiles2.setLocation(175, 10);
+		profiles2.setSize(150, 23);
+		profiles2.setModel(profiles.getModel());
+
+		profilePanel.add(addProfile);
+		addProfile.setLocation(105, 40);
+		addProfile.setSize(100, 30);
+
+		profilePanel.add(removeProfile);
+		removeProfile.setLocation(225, 40);
+		removeProfile.setSize(100, 30);
+		
+		profilePanel.add(userLabel);
+		userLabel.setLocation(105, 78);
 		userLabel.setSize(200, 20);
 		
-		base.add(user);
-		user.setLocation(405, 88);
-		user.setSize(190, 25);
+		profilePanel.add(user);
+		user.setLocation(105, 98);
+		user.setSize(220, 25);
 		
-		base.add(passLabel);
-		passLabel.setLocation(405, 115);
+		profilePanel.add(passLabel);
+		passLabel.setLocation(105, 125);
 		passLabel.setSize(200, 20);
 		
-		base.add(pass);
-		pass.setLocation(405, 135);
-		pass.setSize(190, 25);
+		profilePanel.add(pass);
+		pass.setLocation(105, 145);
+		pass.setSize(220, 25);
 		pass.addFocusListener(new FocusAdapter(){
 			@Override
 			public void focusGained(FocusEvent e) {
@@ -216,59 +239,124 @@ public class LauncherFrame extends JFrame {
 			}
 		});
 		
-		base.add(savePass);
-		savePass.setLocation(405, 163);
+		profilePanel.add(savePass);
+		savePass.setLocation(105, 173);
 		savePass.setSize(190, 20);
 
-		base.add(authType);
-		authType.setLocation(485, 188);
-		authType.setSize(110, 23);
+		profilePanel.add(authType);
+		authType.setLocation(185, 208);
+		authType.setSize(140, 23);
 		for(AuthType at : AuthType.values()) {
 			authType.addItem(at);
 		}
 		
-		base.add(authTypeLabel);
-		authTypeLabel.setLocation(405, 188);
+		profilePanel.add(authTypeLabel);
+		authTypeLabel.setLocation(105, 208);
 		authTypeLabel.setSize(80, 20);
 
-		base.add(gameVersion);
-		gameVersion.setLocation(485, 216);
-		gameVersion.setSize(110, 23);
+		profilePanel.add(gameVersion);
+		gameVersion.setLocation(185, 236);
+		gameVersion.setSize(140, 23);
 		
-		base.add(gameVersionLabel);
-		gameVersionLabel.setLocation(405, 216);
+		profilePanel.add(gameVersionLabel);
+		gameVersionLabel.setLocation(105, 236);
 		gameVersionLabel.setSize(80, 20);
-		
-		base.add(launch);
-		launch.setLocation(405, 302);
-		launch.setSize(190, 38);
 
+		profilePanel.add(runPathLabel);
+		runPathLabel.setLocation(105, 275);
+		runPathLabel.setSize(200, 20);
+		
+		profilePanel.add(runPath);
+		runPath.setLocation(105, 300);
+		runPath.setSize(190, 25);
+		
+		profilePanel.add(runPathSearch);
+		runPathSearch.setLocation(300, 300);
+		runPathSearch.setSize(25, 25);
+		runPathSearch.addActionListener(new ActionListener() {
+			private JFileChooser fc = new JFileChooser();
+			public void actionPerformed(ActionEvent e) {
+				fc.setCurrentDirectory(new File(runPath.getText()));
+				fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				fc.showDialog(LauncherFrame.this, Lang.getString("ui.runpath.filechooser.title"));
+				if(fc.getSelectedFile() != null)
+					runPath.setText(fc.getSelectedFile().getPath());
+			}
+		});
+
+		//================ module panel ====================
+		
+		base.add(modulePanel);
+		modulePanel.setLocation(0, 0);
+		modulePanel.setSize(430, 350);
+		modulePanel.setLayout(null);
+		modulePanel.setVisible(false);
+
+		modulePanel.add(modulesLabel);
+		modulesLabel.setLocation(5, 0);
+		modulesLabel.setSize(300, 20);
+		
+		modulePanel.add(modulesOuter);
+		modulesOuter.setLocation(0, 20);
+		modulesOuter.setSize(430, 290);
+		modulesModel.addColumn(Lang.getString("ui.table.name"));
+		modulesModel.addColumn(Lang.getString("ui.table.type"));
+		modulesModel.addColumn(Lang.getString("ui.table.state"));
+		modules.getTableHeader().getColumnModel().getColumn(0).setPreferredWidth(125);
+		modules.getTableHeader().getColumnModel().getColumn(1).setPreferredWidth(75);
+		modules.getTableHeader().getColumnModel().getColumn(2).setPreferredWidth(75);
+		modules.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+		modulePanel.add(installModules);
+		installModules.setLocation(5, 320);
+		installModules.setSize(90, 30);
+		
+		modulePanel.add(uninstallModules);
+		uninstallModules.setLocation(100, 320);
+		uninstallModules.setSize(90, 30);
+		
+		modulePanel.add(showOld);
+		showOld.setLocation(195, 322);
+		showOld.setSize(100, 25);
+
+		modulePanel.add(showSnapshot);
+		showSnapshot.setLocation(295, 322);
+		showSnapshot.setSize(100, 25);
+
+		//================ system panel ====================
+
+		base.add(systemPanel);
+		systemPanel.setLocation(100, 40);
+		systemPanel.setSize(230, 260);
+		systemPanel.setLayout(null);
+		systemPanel.setVisible(false);
+		
 		runningMode.add(runningMode32);
 		runningMode.add(runningMode64);
 		runningMode.add(runningModeDefault);
 		
-		base.add(runningMode32);
-		runningMode32.setLocation(5, 320);
+		systemPanel.add(runningMode32);
+		runningMode32.setLocation(5, 55);
 		runningMode32.setSize(62, 20);
 		
-		base.add(runningMode64);
-		runningMode64.setLocation(67, 320);
+		systemPanel.add(runningMode64);
+		runningMode64.setLocation(77, 55);
 		runningMode64.setSize(63, 20);
 		
-		base.add(runningModeDefault);
-		runningModeDefault.setLocation(130, 320);
+		systemPanel.add(runningModeDefault);
+		runningModeDefault.setLocation(150, 55);
 		runningModeDefault.setSize(70, 20);
 		
-		base.add(jrePathLabel);
-		jrePathLabel.setLocation(5, 265);
+		systemPanel.add(jrePathLabel);
+		jrePathLabel.setLocation(5, 0);
 		jrePathLabel.setSize(200, 20);
 		
-		base.add(jrePath);
-		jrePath.setLocation(5, 290);
-		jrePath.setSize(160, 25);
+		systemPanel.add(jrePath);
+		jrePath.setLocation(5, 25);
+		jrePath.setSize(190, 25);
 		
-		base.add(jrePathSearch);
-		jrePathSearch.setLocation(170, 290);
+		systemPanel.add(jrePathSearch);
+		jrePathSearch.setLocation(200, 25);
 		jrePathSearch.setSize(25, 25);
 		jrePathSearch.addActionListener(new ActionListener() {
 			private JFileChooser fc = new JFileChooser();
@@ -281,17 +369,17 @@ public class LauncherFrame extends JFrame {
 			}
 		});
 		
-		base.add(memorySizeLabel);
-		memorySizeLabel.setLocation(205, 270);
+		systemPanel.add(memorySizeLabel);
+		memorySizeLabel.setLocation(5, 85);
 		memorySizeLabel.setSize(110, 20);
 		
-		base.add(memorySize);
-		memorySize.setLocation(315, 270);
-		memorySize.setSize(80, 25);
+		systemPanel.add(memorySize);
+		memorySize.setLocation(115, 85);
+		memorySize.setSize(110, 25);
 		
-		base.add(memorySizeSlider);
-		memorySizeSlider.setLocation(205, 295);
-		memorySizeSlider.setSize(190, 38);
+		systemPanel.add(memorySizeSlider);
+		memorySizeSlider.setLocation(5, 110);
+		memorySizeSlider.setSize(220, 38);
 		memorySizeSlider.setMinimum(0);
 		memorySizeSlider.setMaximum(8192);
 		memorySizeSlider.addChangeListener(new ChangeListener(){
@@ -300,54 +388,37 @@ public class LauncherFrame extends JFrame {
 			}
 		});
 		
-		base.add(profilesLabel);
-		profilesLabel.setLocation(405, 5);
-		profilesLabel.setSize(65, 20);
+		systemPanel.add(enableProxy);
+		enableProxy.setLocation(5, 160);
+		enableProxy.setSize(220, 20);
 		
-		base.add(profiles);
-		profiles.setLocation(470, 5);
-		profiles.setSize(125, 23);
+		systemPanel.add(proxyTypeLabel);
+		proxyTypeLabel.setLocation(5, 185);
+		proxyTypeLabel.setSize(100, 20);
 		
-		base.add(addProfile);
-		addProfile.setLocation(405, 35);
-		addProfile.setSize(92, 30);
+		systemPanel.add(proxyType);
+		proxyType.setLocation(105, 185);
+		proxyType.setSize(120, 20);
+		
+		systemPanel.add(proxyHostPortLabel);
+		proxyHostPortLabel.setLocation(5, 210);
+		proxyHostPortLabel.setSize(220, 20);
 
-		base.add(removeProfile);
-		removeProfile.setLocation(503, 35);
-		removeProfile.setSize(92, 30);
-
-		base.add(runPathLabel);
-		runPathLabel.setLocation(405, 245);
-		runPathLabel.setSize(200, 20);
-		
-		base.add(runPath);
-		runPath.setLocation(405, 270);
-		runPath.setSize(160, 25);
-		
-		base.add(runPathSearch);
-		runPathSearch.setLocation(570, 270);
-		runPathSearch.setSize(25, 25);
-		runPathSearch.addActionListener(new ActionListener() {
-			private JFileChooser fc = new JFileChooser();
-			public void actionPerformed(ActionEvent e) {
-				fc.setCurrentDirectory(new File(runPath.getText()));
-				fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				fc.showDialog(LauncherFrame.this, Lang.getString("ui.runpath.filechooser.title"));
-				if(fc.getSelectedFile() != null)
-					runPath.setText(fc.getSelectedFile().getPath());
-			}
-		});
+		systemPanel.add(proxy);
+		proxy.setLocation(5, 235);
+		proxy.setSize(220, 20);
 	}
 
 	public void setStdOut() {
 		if(thisStdOut != null && thisStdOut == System.out) {
 			System.setOut(oldStdOut);
 			if(Config.showDebugInfo) {
-				System.setErr(oldStdOut);
+				System.setErr(oldStdErr);
 			}
 		} else {
 			thisStdOut = new PrintStream(new ConsoleOutputStream(), true);
 			oldStdOut = System.out;
+			oldStdErr = System.err;
 			System.setOut(thisStdOut);
 			if(Config.showDebugInfo) {
 				System.setErr(thisStdOut);
@@ -358,8 +429,7 @@ public class LauncherFrame extends JFrame {
 	public void outputConsole(final String message) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				console.append(message);
-				consoleOuter.getVerticalScrollBar().setValue(999999);
+				commentLabel.setText(message);
 			}
 		});
 	}
@@ -376,18 +446,18 @@ public class LauncherFrame extends JFrame {
 			}
 		}
 
-		@Override
-		public void flush() throws IOException {
-			synchronized (buffer) {
-				outputConsole(new String(buffer, 0, pos));
-				pos = 0;
-			}
-		}
-
 		public void write(int b) throws IOException {
 			synchronized (buffer) {
-				buffer[pos] = (byte) b;
-				pos++;
+				if(b == 13) {
+					outputConsole(new String(buffer, 0, pos));
+					pos = 0;
+				} else {
+					buffer[pos] = (byte) b;
+					pos++;
+					if(pos >= buffer.length) {
+						pos = 0;
+					}
+				}
 			}
 		}
 	}
