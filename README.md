@@ -10,10 +10,8 @@ Clone this repository and import it into Eclipse, and then begin your developmen
 <a href="/build/SSASTLauncher.jar">SSASTLauncher.jar</a>
 
 ## Latest Version
-<b>1.7.0</b><br>
-* Simplified UI<br>
-* Bug report enabled<br>
-* Proxy is used in Minecraft<br>
+<b>1.7.1</b><br>
+* Consider "jar" in &lt;version&gt;.json<br>
 
 ## Future Version
 No future features planned.

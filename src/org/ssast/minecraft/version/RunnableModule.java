@@ -615,7 +615,11 @@ public class RunnableModule extends Module {
 	}
 	
 	private String getModuleJarUrl() {
-		return Config.MINECRAFT_DOWNLOAD_BASE + String.format(Config.MINECRAFT_VERSION_GAME_FORMAT, getName(), getName());
+		String jarVersion = getName();
+		if(tryLoadModuleInfo()) {
+			jarVersion = moduleInfo.jar;
+		}
+		return Config.MINECRAFT_DOWNLOAD_BASE + String.format(Config.MINECRAFT_VERSION_GAME_FORMAT, jarVersion, jarVersion);
 	}
 	
 	private String getModuleJarPath() {

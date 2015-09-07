@@ -21,6 +21,7 @@ public class RunnableModuleInfo {
 	public String assets;
 	public String inheritsFrom;
 	public Stack<RunnableModule> inhertStack;
+	public String jar;
 	
 	public RunnableModuleInfo(JSONObject json) {
 		id = json.getString("id");
@@ -58,6 +59,10 @@ public class RunnableModuleInfo {
 			this.assets = json.getString("assets");
 		} else {
 			this.assets = "legacy";
+		}
+		
+		if(json.has("jar")) {
+			this.jar = json.getString("jar");
 		}
 	}
 	
