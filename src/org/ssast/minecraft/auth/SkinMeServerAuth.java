@@ -145,10 +145,6 @@ public class SkinMeServerAuth extends ServerAuth {
 			callback.authDone(this, false);
 		}
 	}
-
-	public void logout() {
-		
-	}
 	
 	public static String getAuthTypeName() {
 		return "SkinMe";

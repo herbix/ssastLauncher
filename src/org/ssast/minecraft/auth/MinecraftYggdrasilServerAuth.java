@@ -146,10 +146,6 @@ public class MinecraftYggdrasilServerAuth extends ServerAuth {
 
 	}
 
-	public void logout() {
-
-	}
-
 	public static String getAuthTypeName() {
 		return Lang.getString("ui.auth.type.yggdrasil");
 	}

@@ -145,13 +145,6 @@ public abstract class ServerAuth {
 	public abstract void login(AuthDoneCallback callback);
 	
 	/**
-	 * When logout, launcher will call this method. If you need
-	 * do something after user close the game, write done here.
-	 */
-	@Deprecated
-	public abstract void logout();
-	
-	/**
 	 * You should override this function to change the name of
 	 * the method.
 	 * @return The auth type name showed in comboBox

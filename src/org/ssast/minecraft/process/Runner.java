@@ -106,6 +106,8 @@ public class Runner {
 
 		valueMap.put("assets_root", Config.gamePath + Config.MINECRAFT_ASSET_PATH);
 		valueMap.put("assets_index_name", module.getAssetsIndex());
+
+		valueMap.put("version_type", module.getType());
 		
 		String[] gameParams = module.getRunningParams();
 		if(!replaceParams(gameParams, valueMap)) {

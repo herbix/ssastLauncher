@@ -47,18 +47,6 @@ public class SSASTServerAuth extends ServerAuth {
 		setUuid(UUID.nameUUIDFromBytes(("SSAST:" + getPlayerName()).getBytes()).toString().replace("-", ""));
 		callback.authDone(SSASTServerAuth.this, true);
 	}
-	
-	public void logout() {
-
-		String param = logoutMsgPatten;
-		param = param.replaceAll("\\$\\{name\\}", SSASTServerAuth.this.getName());
-		param = param.replaceAll("\\$\\{session\\}", getSession());
-		String url = logoutUrl;
-		url = url.replaceAll("\\$\\{name\\}", SSASTServerAuth.this.getName());
-		url = url.replaceAll("\\$\\{session\\}", getSession());
-		
-		HttpFetcher.fetchUsePostMethod(url, param);
-	}
 
 	private static final char[] digits = 
 		{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};

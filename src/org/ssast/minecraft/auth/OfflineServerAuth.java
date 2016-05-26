@@ -12,10 +12,6 @@ public class OfflineServerAuth extends ServerAuth {
 		callback.authDone(this, true);
 	}
 
-	public void logout() {
-
-	}
-
 	public static String getAuthTypeName() {
 		return Lang.getString("ui.auth.type.offline");
 	}

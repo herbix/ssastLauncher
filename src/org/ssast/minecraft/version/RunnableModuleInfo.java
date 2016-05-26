@@ -63,6 +63,8 @@ public class RunnableModuleInfo {
 		
 		if(json.has("jar")) {
 			this.jar = json.getString("jar");
+		} else {
+			this.jar = id;
 		}
 	}
 	

@@ -10,8 +10,8 @@ Clone this repository and import it into Eclipse, and then begin your developmen
 <a href="/build/SSASTLauncher.jar">SSASTLauncher.jar</a>
 
 ## Latest Version
-<b>1.7.1</b><br>
-* Consider "jar" in &lt;version&gt;.json<br>
+<b>1.7.2</b><br>
+* Fixed the bug caused by "jar"<br>
 
 ## Future Version
 No future features planned.
