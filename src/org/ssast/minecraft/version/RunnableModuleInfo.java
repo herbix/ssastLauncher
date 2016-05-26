@@ -2,6 +2,7 @@ package org.ssast.minecraft.version;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import org.json.JSONArray;
@@ -22,6 +23,8 @@ public class RunnableModuleInfo {
 	public String inheritsFrom;
 	public Stack<RunnableModule> inhertStack;
 	public String jar;
+	public DownloadInfo assetIndex;
+	public Map<String, DownloadInfo> downloads;
 	
 	public RunnableModuleInfo(JSONObject json) {
 		id = json.getString("id");
@@ -65,6 +68,14 @@ public class RunnableModuleInfo {
 			this.jar = json.getString("jar");
 		} else {
 			this.jar = id;
+		}
+
+		if(json.has("downloads")) {
+			this.downloads = DownloadInfo.getDownloadInfo(json.getJSONObject("downloads"));
+		}
+
+		if(json.has("assetIndex")) {
+			this.assetIndex = new DownloadInfo("assetIndex", json.getJSONObject("assetIndex"));
 		}
 	}
 	

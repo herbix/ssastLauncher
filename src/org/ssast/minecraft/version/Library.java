@@ -2,6 +2,7 @@ package org.ssast.minecraft.version;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -19,9 +20,10 @@ public class Library {
 	private String key;
 	private String url;
 	private String arch = "32";
-	
+	private Map<String, DownloadInfo> downloads;
+
 	private Library() {
-		
+
 	}
 
 	public Library(JSONObject json) {
@@ -49,6 +51,9 @@ public class Library {
 			if(!url.endsWith("/"))
 				url += "/";
 		}
+		if(json.has("downloads")) {
+			downloads = DownloadInfo.getDownloadInfo(json.getJSONObject("downloads"));
+		}
 	}
 
 	public String getKey() {
@@ -69,19 +74,42 @@ public class Library {
 		key = result;
 		return result;
 	}
-	
+
 	public String getTempFilePath() {
 		return Config.TEMP_DIR + "/libraries/" + getKey();
 	}
-	
+
+	private DownloadInfo getDownloadInfo() {
+		if(downloads != null) {
+			if(nativesMap != null) {
+				DownloadInfo info = downloads.get("classifiers");
+				if(info != null) {
+					String osName = OS.getCurrentPlatform().getName();
+					return info.getPlatformDownloadInfo(nativesMap.getString(osName).replaceAll("\\$\\{arch\\}", arch));
+				}
+			} else {
+				return downloads.get("artifact");
+			}
+		}
+		return null;
+	}
+
 	public String getFullUrl() {
+		DownloadInfo info = getDownloadInfo();
+		if (info != null && info.url != null) {
+			return info.url;
+		}
 		if(url != null)
 			return url + getKey();
 		else
 			return Config.MINECRAFT_DOWNLOAD_LIBRARY + "/" + getKey();
 	}
-	
+
 	public String getRealFilePath() {
+		DownloadInfo info = getDownloadInfo();
+		if (info != null && info.path != null) {
+			return Config.gamePath + "/libraries/" + info.path;
+		}
 		return Config.gamePath + "/libraries/" + getKey();
 	}
 
@@ -103,7 +131,10 @@ public class Library {
 	}
 
 	public String getShaUrl() {
-		return getFullUrl() + ".sha1";
+		if(getDownloadInfo() == null) {
+			return getFullUrl() + ".sha1";
+		}
+		return null;
 	}
 
 	public String getTempShaPath() {
@@ -113,16 +144,20 @@ public class Library {
 	public String getRealShaPath() {
 		return getRealFilePath() + ".sha";
 	}
-	
+
 	public boolean downloaded() {
+		DownloadInfo info = getDownloadInfo();
+		if(info != null) {
+			return EasyFileAccess.doSha1Checksum2(info.sha1, getRealFilePath());
+		}
 		return EasyFileAccess.doSha1Checksum(getRealShaPath(), getRealFilePath());
 	}
-	
+
 	@Override
 	public boolean equals(Object o) {
-		return (o instanceof Library) ? ((Library)o).name.equals(name) : false;
+		return (o instanceof Library) && ((Library) o).name.equals(name);
 	}
-	
+
 	public boolean have64BitVersion() {
 		if(!needDownloadInOS()) {
 			return false;
@@ -150,5 +185,5 @@ public class Library {
 	public boolean isCompatibleForArch(String arch2) {
 		return !have64BitVersion() || arch.equals(arch2);
 	}
-	
+
 }

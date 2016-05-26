@@ -49,8 +49,8 @@ public class RunnableModule extends Module {
 
 		if(moduleInfo != null && !moduleInfo.canRunInThisOS()) {
 			System.out.println(Lang.getString("msg.module.notallowed"));
-			System.out.println(Lang.getString("msg.module.reason") + moduleInfo.incompatibilityReason);
-			System.out.println(Lang.getString("msg.module.failed") + "[" + getName() + "]");
+			System.out.println(Lang.getString("msg.module.failed") + "[" + getName() + "] " +
+					Lang.getString("msg.module.reason") + moduleInfo.incompatibilityReason);
 			return;
 		}
 
@@ -92,13 +92,13 @@ public class RunnableModule extends Module {
 
 			if(succeed) {
 				if(type.equals("json")) {
-					downloadDoneJson(d, succeed, queueEmpty);
+					downloadDoneJson(d);
 				} else if(type.equals("json-inhert")) {
-					downloadDoneJsonInhert(d, succeed, queueEmpty);
+					downloadDoneJsonInhert(d);
 				} else if(type.equals("bin")) {
-					downloadDoneBin(d, succeed, queueEmpty);
+					downloadDoneBin(d, queueEmpty);
 				} else if(type.equals("sha")) {
-					downloadDoneSha(d, succeed, queueEmpty);
+					downloadDoneSha(d, queueEmpty);
 				}
 			} else {
 				if(progress != null) {
@@ -109,7 +109,7 @@ public class RunnableModule extends Module {
 			}
 		}
 
-		private void downloadDoneJson(Downloadable d, boolean succeed, boolean queueEmpty) {
+		private void downloadDoneJson(Downloadable d) {
 			JSONObject json = new JSONObject(d.getDownloaded());
 			moduleInfo = new RunnableModuleInfo(json);
 
@@ -130,7 +130,7 @@ public class RunnableModule extends Module {
 			checkModuleAssets();
 		}
 		
-		private void downloadDoneJsonInhert(Downloadable d, boolean succeed, boolean queueEmpty) {
+		private void downloadDoneJsonInhert(Downloadable d) {
 			JSONObject json = new JSONObject(d.getDownloaded());
 			RunnableModule currentModule = moduleInfo.inhertStack.peek();
 			currentModule.moduleInfo = new RunnableModuleInfo(json);
@@ -153,7 +153,7 @@ public class RunnableModule extends Module {
 			checkModuleAssets();
 		}
 		
-		private void downloadDoneBin(Downloadable d, boolean succeed, boolean queueEmpty) {
+		private void downloadDoneBin(Downloadable d, boolean queueEmpty) {
 			File file = new File(d.getSavedFile());
 			File fileReal;
 			
@@ -171,7 +171,7 @@ public class RunnableModule extends Module {
 			}
 		}
 		
-		private void downloadDoneSha(Downloadable d, boolean succeed, boolean queueEmpty) {
+		private void downloadDoneSha(Downloadable d, boolean queueEmpty) {
 			File file = new File(d.getSavedFile());
 			File fileReal;
 			
@@ -190,11 +190,10 @@ public class RunnableModule extends Module {
 		System.out.println(Lang.getString("msg.zip.unzip") + lib.getKey());
 		
 		List<String> excludes = lib.getExtractExclude();
-		String extractBase = toWhere;
-		new File(extractBase).mkdirs();
+		new File(toWhere).mkdirs();
 
 		EasyZipAccess.extractZip(fileReal.getPath(), 
-			lib.getExtractTempPath() + "/", extractBase, excludes, "");
+			lib.getExtractTempPath() + "/", toWhere, excludes, "");
 	}
 	
 	public boolean checkInhert() {
@@ -238,7 +237,7 @@ public class RunnableModule extends Module {
 
 		int addCount = 0;
 
-		if(!new File(getModuleJarPath()).isFile()) {
+		if(!gameJarDownloaded()) {
 
 			new File(getModuleJarTempPath()).getParentFile().mkdirs();
 			new File(getModuleJarPath()).getParentFile().mkdirs();
@@ -261,9 +260,12 @@ public class RunnableModule extends Module {
 			new File(lib.getTempFilePath()).getParentFile().mkdirs();
 			new File(lib.getRealFilePath()).getParentFile().mkdirs();
 
-			moduleDownloader.addDownload(
-				new Downloadable(lib.getShaUrl(), lib.getTempShaPath(),
-				new GameDownloadCallback("sha", lib)));
+			String shaUrl = lib.getShaUrl();
+			if (shaUrl != null) {
+				moduleDownloader.addDownload(
+					new Downloadable(shaUrl, lib.getTempShaPath(),
+					new GameDownloadCallback("sha", lib)));
+			}
 
 			moduleDownloader.addDownload(
 				new Downloadable(lib.getFullUrl(), lib.getTempFilePath(),
@@ -273,13 +275,12 @@ public class RunnableModule extends Module {
 		}
 		
 		for(AssetItem asset : moduleAssets.objects) {
-			File realFile = new File(asset.getRealFilePath());
-
-			if(realFile.isFile())
+			if(asset.downloaded()) {
 				continue;
+			}
 
 			new File(asset.getTempFilePath()).getParentFile().mkdirs();
-			realFile.getParentFile().mkdirs();
+			new File(asset.getRealFilePath()).getParentFile().mkdirs();
 
 			moduleDownloader.addDownload(
 					new Downloadable(asset.getFullUrl(), asset.getTempFilePath(),
@@ -301,6 +302,16 @@ public class RunnableModule extends Module {
 			progress.setValue(0);
 			progress.setMaximum(moduleDownloader.downloadCount() * 100);
 		}
+	}
+
+	private boolean gameJarDownloaded() {
+		if(tryLoadModuleInfo() && moduleInfo.downloads != null) {
+			DownloadInfo info = moduleInfo.downloads.get("client");
+			if(info != null && info.sha1 != null) {
+				return EasyFileAccess.doSha1Checksum2(info.sha1, getModuleJarPath());
+			}
+		}
+		return new File(getModuleJarPath()).isFile();
 	}
 
 	class AssetDownloadCallback extends DownloadCallbackAdapter {
@@ -425,7 +436,7 @@ public class RunnableModule extends Module {
 
 		if(installState == -1) {
 
-			if(!new File(getModuleJarPath()).isFile()) {
+			if(!gameJarDownloaded()) {
 				installState = 0;
 				return false;
 			}
@@ -578,10 +589,7 @@ public class RunnableModule extends Module {
 	}
 	
 	public boolean isAssetsVirtual() {
-		if(tryLoadModuleAssets()) {
-			return moduleAssets.virtual;
-		}
-		return false;
+		return tryLoadModuleAssets() && moduleAssets.virtual;
 	}
 	
 	public boolean copyAssetsToVirtual() {
@@ -617,6 +625,12 @@ public class RunnableModule extends Module {
 	private String getModuleJarUrl() {
 		String jarVersion = getName();
 		if(tryLoadModuleInfo()) {
+			if(moduleInfo.downloads != null) {
+				DownloadInfo info = moduleInfo.downloads.get("client");
+				if(info != null && info.url != null) {
+					return info.url;
+				}
+			}
 			jarVersion = moduleInfo.jar;
 		}
 		return Config.MINECRAFT_DOWNLOAD_BASE + String.format(Config.MINECRAFT_VERSION_GAME_FORMAT, jarVersion, jarVersion);
@@ -635,10 +649,25 @@ public class RunnableModule extends Module {
 	}
 	
 	private String getModuleAssetsIndexUrl() {
+		if(tryLoadModuleInfo()) {
+			if(moduleInfo.assetIndex != null) {
+				if(moduleInfo.assetIndex.url != null) {
+					return moduleInfo.assetIndex.url;
+				}
+			}
+		}
 		return Config.MINECRAFT_DOWNLOAD_BASE + "/indexes/" + getAssetsIndex() + ".json";
 	}
 	
 	private String getModuleAssetsIndexPath() {
+		if(tryLoadModuleInfo()) {
+			if(moduleInfo.assetIndex != null) {
+				if(moduleInfo.assetIndex.sha1 != null) {
+					return Config.gamePath + Config.MINECRAFT_INDEXES_PATH + "/" + getAssetsIndex() + "/" +
+							moduleInfo.assetIndex.sha1 + ".json";
+				}
+			}
+		}
 		return Config.gamePath + Config.MINECRAFT_INDEXES_PATH + "/" + getAssetsIndex() + ".json";
 	}
 
@@ -669,6 +698,12 @@ public class RunnableModule extends Module {
 		String resourceStr = EasyFileAccess.loadFile(getModuleAssetsIndexPath());
 		if(resourceStr == null) {
 			return false;
+		}
+
+		if(moduleInfo.assetIndex != null) {
+			if(!EasyFileAccess.doSha1Checksum2(moduleInfo.assetIndex.sha1, getModuleAssetsIndexPath())) {
+				return false;
+			}
 		}
 
 		try {

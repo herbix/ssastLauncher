@@ -130,4 +130,16 @@ public class EasyFileAccess {
 		String checksum2 = getDigest(checkedFile, "SHA-1", 40);
 		return checksum.equalsIgnoreCase(checksum2);
 	}
+
+	public static boolean doSha1Checksum2(String checksum, String checkedFilePath) {
+		File checkedFile = new File(checkedFilePath);
+		if(!checkedFile.isFile()) {
+			return false;
+		}
+		if(checksum == null) {
+			return true;
+		}
+		String checksum2 = getDigest(checkedFile, "SHA-1", 40);
+		return checksum.equalsIgnoreCase(checksum2);
+	}
 }

@@ -3,6 +3,8 @@ package org.ssast.minecraft.version;
 import org.json.JSONObject;
 import org.ssast.minecraft.Config;
 
+import java.io.File;
+
 public class AssetItem {
 	
 	private String name;
@@ -42,5 +44,8 @@ public class AssetItem {
 	public String getVirtualPath() {
 		return Config.gamePath + Config.MINECRAFT_VIRTUAL_PATH + "/" + getName();
 	}
-	
+
+	public boolean downloaded() {
+		return new File(getRealFilePath()).isFile();
+	}
 }

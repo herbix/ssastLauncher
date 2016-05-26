@@ -133,7 +133,7 @@ public class LauncherFrame extends JFrame {
 		});
 
 		setResizable(false);
-		setTitle("SSAST Minecraft Launcher V" + Launcher.VERSION + " (Made by herbix)");
+		setTitle("SSAST Minecraft Launcher V" + Launcher.VERSION + " (Made by Chaofan)");
 		setIconImage(new ImageIcon(getClass().getResource("/favicon.png")).getImage());
 		base.setPreferredSize(new Dimension(600, 400));
 		add(base);
@@ -436,7 +436,7 @@ public class LauncherFrame extends JFrame {
 	
 	class ConsoleOutputStream extends OutputStream {
 
-		byte[] buffer = new byte[65536];
+		final byte[] buffer = new byte[65536];
 		int pos = 0;
 
 		@Override
@@ -449,7 +449,11 @@ public class LauncherFrame extends JFrame {
 		public void write(int b) throws IOException {
 			synchronized (buffer) {
 				if(b == 13) {
-					outputConsole(new String(buffer, 0, pos));
+					String message = new String(buffer, 0, pos);
+					outputConsole(message);
+					if(oldStdOut != null) {
+						oldStdOut.print(message);
+					}
 					pos = 0;
 				} else {
 					buffer[pos] = (byte) b;
