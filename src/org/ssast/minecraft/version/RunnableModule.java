@@ -700,7 +700,7 @@ public class RunnableModule extends Module {
 			return false;
 		}
 
-		if(moduleInfo.assetIndex != null) {
+		if(moduleInfo.assetIndex != null && moduleInfo.assetIndex.sha1 != null) {
 			if(!EasyFileAccess.doSha1Checksum2(moduleInfo.assetIndex.sha1, getModuleAssetsIndexPath())) {
 				return false;
 			}

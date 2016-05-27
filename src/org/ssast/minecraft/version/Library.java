@@ -1,5 +1,6 @@
 package org.ssast.minecraft.version;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -131,10 +132,13 @@ public class Library {
 	}
 
 	public String getShaUrl() {
-		if(getDownloadInfo() == null) {
-			return getFullUrl() + ".sha1";
+		if(getDownloadInfo() != null) {
+			return null;
 		}
-		return null;
+		if(url != null) {
+			return null;
+		}
+		return getFullUrl() + ".sha1";
 	}
 
 	public String getTempShaPath() {
@@ -148,7 +152,11 @@ public class Library {
 	public boolean downloaded() {
 		DownloadInfo info = getDownloadInfo();
 		if(info != null) {
-			return EasyFileAccess.doSha1Checksum2(info.sha1, getRealFilePath());
+			if (info.sha1 != null) {
+				return EasyFileAccess.doSha1Checksum2(info.sha1, getRealFilePath());
+			} else {
+				return new File(getRealFilePath()).isFile();
+			}
 		}
 		return EasyFileAccess.doSha1Checksum(getRealShaPath(), getRealFilePath());
 	}
