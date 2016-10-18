@@ -660,14 +660,6 @@ public class RunnableModule extends Module {
 	}
 	
 	private String getModuleAssetsIndexPath() {
-		if(tryLoadModuleInfo()) {
-			if(moduleInfo.assetIndex != null) {
-				if(moduleInfo.assetIndex.sha1 != null) {
-					return Config.gamePath + Config.MINECRAFT_INDEXES_PATH + "/" + getAssetsIndex() + "/" +
-							moduleInfo.assetIndex.sha1 + ".json";
-				}
-			}
-		}
 		return Config.gamePath + Config.MINECRAFT_INDEXES_PATH + "/" + getAssetsIndex() + ".json";
 	}
 
