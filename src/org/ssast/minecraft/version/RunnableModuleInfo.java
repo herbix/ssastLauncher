@@ -85,5 +85,8 @@ public class RunnableModuleInfo {
 
 	public void addInheritedInfo(RunnableModuleInfo inherted) {
 		this.libraries.addAll(inherted.libraries);
+		if (this.assets.equals("legacy")) {
+			this.assets = inherted.assets;
+		}
 	}
 }
