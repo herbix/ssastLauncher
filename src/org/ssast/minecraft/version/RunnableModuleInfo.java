@@ -83,10 +83,13 @@ public class RunnableModuleInfo {
 		return Rule.isAllowed(rules);
 	}
 
-	public void addInheritedInfo(RunnableModuleInfo inherted) {
-		this.libraries.addAll(inherted.libraries);
+	public void addInheritedInfo(RunnableModuleInfo inherited) {
+		this.libraries.addAll(inherited.libraries);
 		if (this.assets.equals("legacy")) {
-			this.assets = inherted.assets;
+			this.assets = inherited.assets;
+		}
+		if (this.assetIndex == null) {
+			this.assetIndex = inherited.assetIndex;
 		}
 	}
 }

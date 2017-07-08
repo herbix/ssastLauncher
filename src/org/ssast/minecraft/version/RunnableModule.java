@@ -63,7 +63,7 @@ public class RunnableModule extends Module {
 				new Downloadable(getModuleJsonUrl(),
 				new GameDownloadCallback("json", null)));
 		} else {
-			if(!checkInhert(moduleInfo, true)) {
+			if(!checkInherit(moduleInfo, true)) {
 				checkModuleAssets();
 			}
 		}
@@ -124,7 +124,7 @@ public class RunnableModule extends Module {
 			new File(getModuleJsonPath()).getParentFile().mkdirs();
 			EasyFileAccess.saveFile(getModuleJsonPath(), d.getDownloaded());
 
-			if(checkInhert(moduleInfo, true)) {
+			if(checkInherit(moduleInfo, true)) {
 				return;
 			}
 			checkModuleAssets();
@@ -137,7 +137,7 @@ public class RunnableModule extends Module {
 			new File(currentModule.getModuleJsonPath()).getParentFile().mkdirs();
 			EasyFileAccess.saveFile(currentModule.getModuleJsonPath(), d.getDownloaded());
 
-			if(checkInhert(currentModule.moduleInfo, true)) {
+			if(checkInherit(currentModule.moduleInfo, true)) {
 				return;
 			}
 
@@ -196,16 +196,16 @@ public class RunnableModule extends Module {
 			lib.getExtractTempPath() + "/", toWhere, excludes, "");
 	}
 	
-	public boolean checkInhert() {
-		return checkInhert(moduleInfo, false);
+	public boolean checkInherit() {
+		return checkInherit(moduleInfo, false);
 	}
 
-	private boolean checkInhert(RunnableModuleInfo info, boolean needDownload) {
+	private boolean checkInherit(RunnableModuleInfo info, boolean needDownload) {
 		if(info.inheritsFrom != null) {
 			Module m = ModuleManager.getModuleFromName(info.inheritsFrom);
 			if(m != null && m instanceof RunnableModule) {
 				RunnableModule rm = (RunnableModule)m;
-				if(!rm.tryLoadModuleInfo() || rm.checkInhert()) {
+				if(!rm.tryLoadModuleInfo() || rm.checkInherit()) {
 					if(needDownload) {
 						moduleInfo.inhertStack.push(rm);
 						moduleDownloader.addDownload(
@@ -446,14 +446,14 @@ public class RunnableModule extends Module {
 				return false;
 			}
 
-			if(!tryLoadModuleAssets()) {
+			if(checkInherit()) {
 				installState = 0;
 				return false;
 			}
-			
-			if(checkInhert()) {
+
+			if(!tryLoadModuleAssets()) {
 				installState = 0;
-				return false;	
+				return false;
 			}
 
 			try {
